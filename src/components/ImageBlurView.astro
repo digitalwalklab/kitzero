@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 import { getExtraCopy } from '../i18n/extraTools';
 
@@ -96,6 +97,8 @@ const copy = getExtraCopy(locale).imageBlur;
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="image-blur" />
 
 <script>
   import { initImageBlur } from '../scripts/image-blur';

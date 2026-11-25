@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 import { getExtraCopy } from '../i18n/extraTools';
 
@@ -82,6 +83,8 @@ const labels = {
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="heic-converter" />
 
 <script>
   import { initHeicConverter } from '../scripts/heic-converter';

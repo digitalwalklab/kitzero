@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 import { getExtra2Copy } from '../i18n/extraTools2';
 
@@ -89,6 +90,8 @@ const copy = getExtra2Copy(locale).svgConverter;
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="svg-converter" />
 
 <script>
   import { initSvgConverter } from '../scripts/svg-converter';

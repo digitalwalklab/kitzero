@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 import { getExtra2Copy } from '../i18n/extraTools2';
 
@@ -101,6 +102,8 @@ const copy = getExtra2Copy(locale).pdfSign;
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="pdf-sign" />
 
 <script>
   import { initPdfSign } from '../scripts/pdf-sign';

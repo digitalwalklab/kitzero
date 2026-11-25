@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 
 interface Props {
@@ -135,6 +136,8 @@ const clientLabels = {
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="thumbnail-resizer" />
 
 <script>
   import { initThumbnailResizer } from '../scripts/thumbnail-resizer';

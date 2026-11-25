@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 import { getExtraCopy } from '../i18n/extraTools';
 
@@ -78,6 +79,8 @@ const copy = getExtraCopy(locale).faviconGenerator;
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="favicon-generator" />
 
 <script>
   import { initFaviconGenerator } from '../scripts/favicon-generator';
