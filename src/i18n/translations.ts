@@ -694,7 +694,7 @@ export const translations: Record<Locale, TranslationDict> = {
     },
     home: {
       metaTitle: 'KitZero — Free 100% Local Image & PDF Converter (Zero Upload)',
-      metaDesc: 'Compress images, convert to WebP, strip EXIF GPS metadata, batch resize thumbnails, and merge/split/convert PDFs privately in your browser. Free, fast, zero server uploads.',
+      metaDesc: 'Compress images, strip EXIF, redact with mosaic, convert HEIC, organize or sign PDFs, and make QR codes locally in your browser. Free, zero uploads.',
       heroTitle: '100% Private File Tools\nThat Never Upload Your Files',
       heroSubtitle: 'Compress photos, strip EXIF, redact with mosaic, convert HEIC, organize PDFs, and create QR codes or favicons — all running locally inside your browser.',
       trustPoints: [
