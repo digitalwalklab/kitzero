@@ -1,0 +1,147 @@
+---
+import ToolIcon from './ToolIcon.astro';
+import { translations, type Locale } from '../i18n/translations';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const home = t.home;
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: home.faqs.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
+    },
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<section class="hero hero-compact">
+  <div class="hero-badge">
+    <span class="trust-dot" aria-hidden="true"></span>
+    {t.localBadge}
+  </div>
+  <h1>{home.heroTitle}</h1>
+  <p>{home.heroSubtitle}</p>
+</section>
+
+<!-- iLoveIMG-inspired Category Filter + Icon-First Tool Hub -->
+<section id="tools" class="tool-hub">
+  <div class="filter-bar" role="tablist" aria-label="Tool categories">
+    <button type="button" class="filter-pill active" role="tab" aria-selected="true" data-filter="all">
+      {t.categories.all}
+      <span class="filter-count">{t.tools.length}</span>
+    </button>
+    <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="image">
+      {t.categories.image}
+      <span class="filter-count">{t.tools.filter((x) => x.category === 'image').length}</span>
+    </button>
+    <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="pdf">
+      {t.categories.pdf}
+      <span class="filter-count">{t.tools.filter((x) => x.category === 'pdf').length}</span>
+    </button>
+    <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="utility">
+      {t.categories.utility}
+      <span class="filter-count">{t.tools.filter((x) => x.category === 'utility').length}</span>
+    </button>
+  </div>
+
+  <div class="hub-grid" data-hub-grid>
+    {t.tools.map((tool) => (
+      <a href={tool.slug} class="card hub-card" data-category={tool.category}>
+        <div class="hub-card-head">
+          <span class={`tool-icon-lg accent-${tool.accent}`}>
+            <ToolIcon id={tool.id} size={22} />
+          </span>
+          <span class="tool-badge">{tool.badge}</span>
+        </div>
+        <h3>{tool.title}</h3>
+        <p>{tool.description}</p>
+        <span class="hub-card-link">
+          <span>{tool.cta}</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<section class="trust-grid" aria-label="Security highlights">
+  {home.trustPoints.map((point, idx) => (
+    <div class="card trust-card">
+      <span class="trust-card-icon" aria-hidden="true">
+        {idx === 0 && (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        )}
+        {idx === 1 && (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 22V12" />
+          </svg>
+        )}
+        {idx === 2 && (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+        )}
+      </span>
+      <h3>{point.title}</h3>
+      <p>{point.desc}</p>
+    </div>
+  ))}
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>{home.faqHeading}</h2>
+  </div>
+  <div class="faq-list">
+    {home.faqs.map((faq) => (
+      <article class="card faq-item">
+        <h3>{faq.q}</h3>
+        <p>{faq.a}</p>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const pills = Array.from(document.querySelectorAll('[data-filter]'));
+    const cards = Array.from(document.querySelectorAll('[data-hub-grid] [data-category]'));
+    function applyFilter(filter) {
+      const target = pills.some((p) => p.getAttribute('data-filter') === filter) ? filter : 'all';
+      pills.forEach((p) => {
+        const active = p.getAttribute('data-filter') === target;
+        p.classList.toggle('active', active);
+        p.setAttribute('aria-selected', String(active));
+      });
+      cards.forEach((card) => {
+        const cat = card.getAttribute('data-category');
+        card.hidden = target !== 'all' && cat !== target;
+      });
+    }
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => applyFilter(pill.getAttribute('data-filter') || 'all'));
+    });
+    const initialCat = new URLSearchParams(window.location.search).get('cat');
+    if (initialCat) applyFilter(initialCat);
+  })();
+</script>

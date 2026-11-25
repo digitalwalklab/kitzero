@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeView from '../components/HomeView.astro';
+import { translations } from '../i18n/translations';
+
+const t = translations.ko;
+---
+
+<BaseLayout locale="ko" title={t.home.metaTitle} description={t.home.metaDesc} activeNav="home">
+  <HomeView locale="ko" />
+</BaseLayout>

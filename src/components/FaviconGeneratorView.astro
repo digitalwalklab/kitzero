@@ -1,0 +1,86 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtraCopy } from '../i18n/extraTools';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtraCopy(locale).faviconGenerator;
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="utility" activeId="favicon-generator" />
+
+<div id="favicon-generator-root" data-copy-text={copy.copyHtml} data-copied-text={copy.copiedHtml}>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="field">
+        <label class="checkbox-card" style="background: var(--surface-subtle); border-color: var(--border);">
+          <input type="checkbox" checked data-fav-transparent />
+          <div>
+            <strong>{copy.transparentLabel}</strong>
+          </div>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="fav-bg">{copy.bgLabel}</label>
+        <input id="fav-bg" type="color" value="#1e3a5f" style="height: 40px; padding: 3px;" data-fav-bg />
+      </div>
+
+      <div class="field">
+        <label for="fav-radius">
+          <span>{copy.radiusLabel}</span>
+          <span data-fav-radius-val>16%</span>
+        </label>
+        <input id="fav-radius" type="range" min="0" max="50" value="16" data-fav-radius />
+      </div>
+
+      <button type="button" class="btn btn-trust" style="width: 100%; margin-top: 12px;" data-fav-zip disabled>
+        {copy.downloadZip}
+      </button>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-fav-drop role="button" tabindex="0">
+        <input type="file" accept="image/*" hidden data-fav-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFile}</span>
+      </div>
+
+      <div class="card panel" style="margin-top: 16px;" data-fav-preview-wrap hidden>
+        <h3 class="panel-title">{copy.previewTitle}</h3>
+        <div class="favicon-preview-grid" data-fav-preview-grid></div>
+      </div>
+
+      <div class="card panel" style="margin-top: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <h3 class="panel-title" style="margin: 0;">{copy.htmlTitle}</h3>
+          <button type="button" class="btn btn-secondary btn-sm" data-fav-copy>{copy.copyHtml}</button>
+        </div>
+        <pre class="code-block" data-fav-html></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initFaviconGenerator } from '../scripts/favicon-generator';
+  const root = document.getElementById('favicon-generator-root');
+  if (root) initFaviconGenerator(root);
+</script>

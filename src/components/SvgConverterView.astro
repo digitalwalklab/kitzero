@@ -1,0 +1,97 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtra2Copy } from '../i18n/extraTools2';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtra2Copy(locale).svgConverter;
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="utility" activeId="svg-converter" />
+
+<div id="svg-converter-root">
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="field">
+        <label for="svg-width">{copy.widthLabel}</label>
+        <input id="svg-width" type="number" min="16" max="4096" value="1024" data-svg-width />
+      </div>
+
+      <div class="field">
+        <label for="svg-format">{copy.formatLabel}</label>
+        <select id="svg-format" data-svg-format>
+          <option value="image/png" selected>PNG</option>
+          <option value="image/webp">WebP</option>
+          <option value="image/jpeg">JPG</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="checkbox-card" style="background: var(--surface-subtle); border-color: var(--border);">
+          <input type="checkbox" checked data-svg-transparent />
+          <div><strong>{copy.transparentLabel}</strong></div>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="svg-bg">{copy.bgLabel}</label>
+        <input id="svg-bg" type="color" value="#ffffff" style="height: 40px; padding: 3px;" data-svg-bg />
+      </div>
+
+      <button type="button" class="btn btn-trust" style="width: 100%; margin-top: 10px;" data-svg-download>
+        {copy.downloadBtn}
+      </button>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-svg-drop role="button" tabindex="0">
+        <input type="file" accept=".svg,image/svg+xml" hidden data-svg-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFile}</span>
+      </div>
+
+      <div class="card panel" style="margin-top: 16px;">
+        <h3 class="panel-title">{copy.previewTitle}</h3>
+        <div style="display: flex; justify-content: center; padding: 16px; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img data-svg-preview alt="SVG preview" style="max-width: 240px; max-height: 240px; object-fit: contain;" />
+        </div>
+      </div>
+
+      <div class="card panel" style="margin-top: 16px;">
+        <div class="field">
+          <label for="svg-code">{copy.codeLabel}</label>
+          <textarea
+            id="svg-code"
+            rows="6"
+            class="code-block"
+            style="width: 100%; resize: vertical; white-space: pre-wrap;"
+            data-svg-code
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initSvgConverter } from '../scripts/svg-converter';
+  const root = document.getElementById('svg-converter-root');
+  if (root) initSvgConverter(root);
+</script>

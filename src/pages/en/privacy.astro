@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PrivacyView from '../../components/PrivacyView.astro';
+import { translations } from '../../i18n/translations';
+
+const t = translations.en;
+---
+
+<BaseLayout
+  locale="en"
+  title={t.privacy.metaTitle}
+  description={t.privacy.metaDesc}
+  activeNav="privacy"
+>
+  <PrivacyView locale="en" />
+</BaseLayout>

@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PdfSignView from '../../components/PdfSignView.astro';
+import { getExtra2Copy } from '../../i18n/extraTools2';
+const copy = getExtra2Copy('en').pdfSign;
+---
+<BaseLayout locale="en" title={copy.metaTitle} description={copy.metaDesc} activeNav="pdf-sign">
+  <PdfSignView locale="en" />
+</BaseLayout>

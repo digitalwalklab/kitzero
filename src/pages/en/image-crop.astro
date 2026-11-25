@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ImageCropView from '../../components/ImageCropView.astro';
+import { getExtra2Copy } from '../../i18n/extraTools2';
+const copy = getExtra2Copy('en').imageCrop;
+---
+<BaseLayout locale="en" title={copy.metaTitle} description={copy.metaDesc} activeNav="image-crop">
+  <ImageCropView locale="en" />
+</BaseLayout>

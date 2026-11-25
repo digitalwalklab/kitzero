@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FaviconGeneratorView from '../../components/FaviconGeneratorView.astro';
+import { getExtraCopy } from '../../i18n/extraTools';
+const copy = getExtraCopy('en').faviconGenerator;
+---
+<BaseLayout locale="en" title={copy.metaTitle} description={copy.metaDesc} activeNav="favicon-generator">
+  <FaviconGeneratorView locale="en" />
+</BaseLayout>

@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SvgConverterView from '../../components/SvgConverterView.astro';
+import { getExtra2Copy } from '../../i18n/extraTools2';
+const copy = getExtra2Copy('en').svgConverter;
+---
+<BaseLayout locale="en" title={copy.metaTitle} description={copy.metaDesc} activeNav="svg-converter">
+  <SvgConverterView locale="en" />
+</BaseLayout>

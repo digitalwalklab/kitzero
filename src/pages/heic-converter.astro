@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeicConverterView from '../components/HeicConverterView.astro';
+import { getExtraCopy } from '../i18n/extraTools';
+const copy = getExtraCopy('ko').heicConverter;
+---
+<BaseLayout locale="ko" title={copy.metaTitle} description={copy.metaDesc} activeNav="heic-converter">
+  <HeicConverterView locale="ko" />
+</BaseLayout>

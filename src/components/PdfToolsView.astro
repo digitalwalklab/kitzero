@@ -1,0 +1,424 @@
+---
+import ToolIcon from './ToolIcon.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtraCopy } from '../i18n/extraTools';
+import { getExtra2Copy } from '../i18n/extraTools2';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = t.pdfTools;
+const extra = getExtraCopy(locale).pdfExtra;
+const more = getExtra2Copy(locale).pdfMore;
+const prefix = locale === 'en' ? '/en' : '';
+const moreLabels = {
+  compressProgress: more.compress.progressText,
+  compressDone: more.compress.doneMsg,
+  compressCancelled: more.compress.cancelledMsg,
+  watermarkDone: more.watermark.doneMsg,
+};
+const extraLabels = {
+  moveUp: copy.merge.moveUp,
+  moveDown: copy.merge.moveDown,
+  remove: copy.merge.remove,
+  fromImageDone: extra.fromImage.doneMsg,
+  rotateLeft: extra.organize.rotateLeft,
+  rotateRight: extra.organize.rotateRight,
+  moveLeft: extra.organize.moveLeft,
+  moveRight: extra.organize.moveRight,
+  deletePage: extra.organize.deletePage,
+  loadingMsg: extra.organize.loadingMsg,
+  organizeDone: extra.organize.doneMsg,
+  emptyError: extra.organize.emptyError,
+};
+const clientLabels = {
+  merge: {
+    moveUp: copy.merge.moveUp,
+    moveDown: copy.merge.moveDown,
+    remove: copy.merge.remove,
+    pagesUnit: copy.merge.pagesUnit,
+    needTwo: copy.merge.needTwo,
+    doneMsg: copy.merge.doneMsg,
+    largeWarn: copy.merge.largeWarn,
+  },
+  split: {
+    totalPages: copy.split.totalPages,
+    doneSingle: copy.split.doneSingle,
+    doneZip: copy.split.doneZip,
+    invalidRange: copy.split.invalidRange,
+    largeWarn: copy.split.largeWarn,
+  },
+  toImage: {
+    downloadSingle: copy.toImage.downloadSingle,
+    progressText: copy.toImage.progressText,
+    doneMsg: copy.toImage.doneMsg,
+    cancelledMsg: copy.toImage.cancelledMsg,
+    invalidRange: copy.toImage.invalidRange,
+    largeWarn: copy.toImage.largeWarn,
+    pagesUnit: copy.merge.pagesUnit,
+  },
+};
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<div
+  id="pdf-tools-root"
+  data-labels={JSON.stringify(clientLabels)}
+  data-extra-labels={JSON.stringify(extraLabels)}
+  data-more-labels={JSON.stringify(moreLabels)}
+>
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab-btn active" role="tab" data-tab-btn="merge">
+      <span class="tool-subtab-icon accent-rose"><ToolIcon id="pdf-merge" size={15} /></span>
+      <span>{copy.tabMerge}</span>
+    </button>
+    <button type="button" class="tab-btn" role="tab" data-tab-btn="split">
+      <span class="tool-subtab-icon accent-amber"><ToolIcon id="pdf-split" size={15} /></span>
+      <span>{copy.tabSplit}</span>
+    </button>
+    <button type="button" class="tab-btn" role="tab" data-tab-btn="to-image">
+      <span class="tool-subtab-icon accent-violet"><ToolIcon id="pdf-to-image" size={15} /></span>
+      <span>{copy.tabToImage}</span>
+    </button>
+    <button type="button" class="tab-btn" role="tab" data-tab-btn="from-image">
+      <span class="tool-subtab-icon accent-emerald"><ToolIcon id="image-to-pdf" size={15} /></span>
+      <span>{extra.tabFromImage}</span>
+    </button>
+    <button type="button" class="tab-btn" role="tab" data-tab-btn="organize">
+      <span class="tool-subtab-icon accent-blue"><ToolIcon id="pdf-organize" size={15} /></span>
+      <span>{extra.tabOrganize}</span>
+    </button>
+    <button type="button" class="tab-btn" role="tab" data-tab-btn="compress">
+      <span class="tool-subtab-icon accent-emerald"><ToolIcon id="pdf-compress" size={15} /></span>
+      <span>{more.tabCompress}</span>
+    </button>
+    <button type="button" class="tab-btn" role="tab" data-tab-btn="watermark">
+      <span class="tool-subtab-icon accent-amber"><ToolIcon id="pdf-watermark" size={15} /></span>
+      <span>{more.tabWatermark}</span>
+    </button>
+    <a href={`${prefix}/pdf-sign/`} class="tab-btn">
+      <span class="tool-subtab-icon accent-rose"><ToolIcon id="pdf-sign" size={15} /></span>
+      <span>{locale === 'ko' ? 'PDF 서명 · 도장' : 'Sign PDF'}</span>
+    </a>
+  </div>
+
+  <!-- TAB 1: MERGE -->
+  <section class="tab-panel active" data-tab-panel="merge">
+    <div class="dropzone" data-merge-drop role="button" tabindex="0">
+      <input type="file" accept="application/pdf" multiple hidden data-merge-input />
+      <div class="dropzone-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="12" y1="18" x2="12" y2="12" />
+          <line x1="9" y1="15" x2="15" y2="15" />
+        </svg>
+      </div>
+      <h2>{copy.merge.dropTitle}</h2>
+      <p>{copy.merge.dropHint}</p>
+      <span class="btn btn-primary btn-sm">{copy.merge.selectFiles}</span>
+    </div>
+
+    <div class="file-list" data-merge-list></div>
+
+    <div class="btn-row" style="margin-top: 16px;">
+      <button type="button" class="btn btn-primary" data-merge-run disabled>{copy.merge.mergeBtn}</button>
+      <button type="button" class="btn btn-secondary" data-merge-clear disabled>{copy.merge.clearBtn}</button>
+    </div>
+    <div class="status-banner" data-merge-status></div>
+  </section>
+
+  <!-- TAB 2: SPLIT -->
+  <section class="tab-panel" data-tab-panel="split">
+    <div class="workspace-grid">
+      <aside class="card panel">
+        <div class="field">
+          <label for="split-mode">{copy.tabSplit}</label>
+          <select id="split-mode" data-split-mode>
+            <option value="range" selected>{copy.split.modeRange}</option>
+            <option value="every">{copy.split.modeEvery}</option>
+          </select>
+        </div>
+
+        <div class="field" data-split-range-field>
+          <label for="split-range">{copy.split.rangeLabel}</label>
+          <input id="split-range" type="text" placeholder={copy.split.rangePlaceholder} data-split-range />
+          <div style="margin-top: 6px; font-size: 0.78rem; color: var(--ink-muted);">{copy.split.rangeHint}</div>
+        </div>
+
+        <button type="button" class="btn btn-primary" style="width: 100%;" data-split-run disabled>
+          {copy.split.splitBtn}
+        </button>
+        <div class="status-banner" data-split-status></div>
+      </aside>
+
+      <div>
+        <div class="dropzone" data-split-drop role="button" tabindex="0">
+          <input type="file" accept="application/pdf" hidden data-split-input />
+          <h2>{copy.split.dropTitle}</h2>
+          <p>{copy.split.dropHint}</p>
+          <span class="btn btn-primary btn-sm">{copy.split.selectFile}</span>
+        </div>
+        <div class="card selected-file-bar" data-split-info-bar hidden>
+          <span data-split-info></span>
+          <button
+            type="button"
+            class="btn-remove"
+            data-split-clear
+            aria-label={locale === 'en' ? 'Remove PDF' : 'PDF 제거'}
+            title={locale === 'en' ? 'Remove PDF' : 'PDF 제거'}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: PDF TO IMAGE -->
+  <section class="tab-panel" data-tab-panel="to-image">
+    <div class="workspace-grid">
+      <aside class="card panel">
+        <div class="field">
+          <label for="pdf-img-format">{copy.toImage.formatLabel}</label>
+          <select id="pdf-img-format" data-img-format>
+            <option value="image/png" selected>PNG</option>
+            <option value="image/jpeg">JPG</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="pdf-img-scale">{copy.toImage.scaleLabel}</label>
+          <select id="pdf-img-scale" data-img-scale>
+            <option value="1.5">{copy.toImage.scaleStandard}</option>
+            <option value="2" selected>{copy.toImage.scaleHigh}</option>
+            <option value="3">{copy.toImage.scaleUltra}</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="pdf-img-range">{copy.toImage.rangeLabel}</label>
+          <input id="pdf-img-range" type="text" placeholder={copy.toImage.rangePlaceholder} data-img-range />
+          <div style="margin-top: 6px; font-size: 0.78rem; color: var(--ink-muted);">{copy.toImage.rangeHint}</div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" style="flex: 1;" data-img-run disabled>
+            {copy.toImage.convertBtn}
+          </button>
+          <button type="button" class="btn btn-secondary btn-side" data-img-cancel disabled>
+            {copy.toImage.cancelBtn}
+          </button>
+        </div>
+        <div class="btn-row" style="margin-top: 8px;">
+          <button type="button" class="btn btn-trust" style="flex: 1;" data-img-zip disabled>
+            {copy.toImage.downloadZip}
+          </button>
+        </div>
+        <div class="status-banner" data-img-status></div>
+      </aside>
+
+      <div>
+        <div class="dropzone" data-img-drop role="button" tabindex="0">
+          <input type="file" accept="application/pdf" hidden data-img-input />
+          <h2>{copy.toImage.dropTitle}</h2>
+          <p>{copy.toImage.dropHint}</p>
+          <span class="btn btn-primary btn-sm">{copy.toImage.selectFile}</span>
+        </div>
+        <div class="card selected-file-bar" data-img-info-bar hidden>
+          <span data-img-info></span>
+          <button
+            type="button"
+            class="btn-remove"
+            data-img-clear
+            aria-label={locale === 'en' ? 'Remove PDF' : 'PDF 제거'}
+            title={locale === 'en' ? 'Remove PDF' : 'PDF 제거'}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="preview-grid" data-img-grid></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: IMAGES TO PDF -->
+  <section class="tab-panel" data-tab-panel="from-image">
+    <div class="workspace-grid">
+      <aside class="card panel">
+        <div class="field">
+          <label for="fromimg-size">{extra.fromImage.pageSizeLabel}</label>
+          <select id="fromimg-size" data-fromimg-size>
+            <option value="a4" selected>{extra.fromImage.sizeA4}</option>
+            <option value="fit">{extra.fromImage.sizeFit}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fromimg-margin">{extra.fromImage.marginLabel}</label>
+          <select id="fromimg-margin" data-fromimg-margin>
+            <option value="0">{extra.fromImage.marginNone}</option>
+            <option value="24" selected>{extra.fromImage.marginSmall}</option>
+            <option value="48">{extra.fromImage.marginMedium}</option>
+          </select>
+        </div>
+        <div class="btn-row" style="margin-top: 16px;">
+          <button type="button" class="btn btn-primary" style="flex: 1;" data-fromimg-run disabled>
+            {extra.fromImage.buildBtn}
+          </button>
+          <button type="button" class="btn btn-secondary btn-side" data-fromimg-clear disabled>
+            {extra.fromImage.clearBtn}
+          </button>
+        </div>
+        <div class="status-banner" data-fromimg-status></div>
+      </aside>
+
+      <div>
+        <div class="dropzone" data-fromimg-drop role="button" tabindex="0">
+          <input type="file" accept="image/*" multiple hidden data-fromimg-input />
+          <h2>{extra.fromImage.dropTitle}</h2>
+          <p>{extra.fromImage.dropHint}</p>
+          <span class="btn btn-primary btn-sm">{extra.fromImage.selectFiles}</span>
+        </div>
+        <div class="file-list" data-fromimg-list></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: ORGANIZE PDF (ROTATE / DELETE / REORDER) -->
+  <section class="tab-panel" data-tab-panel="organize">
+    <div class="dropzone" data-org-drop role="button" tabindex="0">
+      <input type="file" accept="application/pdf" hidden data-org-input />
+      <h2>{extra.organize.dropTitle}</h2>
+      <p>{extra.organize.dropHint}</p>
+      <span class="btn btn-primary btn-sm">{extra.organize.selectFile}</span>
+    </div>
+
+    <div class="btn-row" style="margin-top: 16px;">
+      <button type="button" class="btn btn-primary" data-org-save disabled>{extra.organize.saveBtn}</button>
+      <button type="button" class="btn btn-secondary" data-org-reset disabled>{extra.organize.resetBtn}</button>
+    </div>
+    <div class="status-banner" data-org-status></div>
+    <div class="preview-grid" data-org-grid></div>
+  </section>
+
+  <!-- TAB 6: PDF COMPRESS -->
+  <section class="tab-panel" data-tab-panel="compress">
+    <div class="workspace-grid">
+      <aside class="card panel">
+        <div class="field">
+          <label for="cmp-level">{more.compress.levelLabel}</label>
+          <select id="cmp-level" data-cmp-level>
+            <option value="light">{more.compress.levelLight}</option>
+            <option value="balanced" selected>{more.compress.levelBalanced}</option>
+            <option value="strong">{more.compress.levelStrong}</option>
+          </select>
+        </div>
+        <div class="btn-row" style="margin-top: 16px;">
+          <button type="button" class="btn btn-primary" style="flex: 1;" data-cmp-run disabled>
+            {more.compress.runBtn}
+          </button>
+          <button type="button" class="btn btn-secondary btn-side" data-cmp-cancel disabled>
+            {more.compress.cancelBtn}
+          </button>
+        </div>
+        <div class="status-banner" data-cmp-status></div>
+      </aside>
+
+      <div>
+        <div class="dropzone" data-cmp-drop role="button" tabindex="0">
+          <input type="file" accept="application/pdf" hidden data-cmp-input />
+          <h2>{more.compress.dropTitle}</h2>
+          <p>{more.compress.dropHint}</p>
+          <span class="btn btn-primary btn-sm">{more.compress.selectFile}</span>
+        </div>
+        <div class="card selected-file-bar" data-cmp-info-bar hidden>
+          <span data-cmp-info></span>
+          <button type="button" class="btn-remove" data-cmp-clear aria-label="Remove PDF">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 7: PDF WATERMARK & PAGE NUMBERS -->
+  <section class="tab-panel" data-tab-panel="watermark">
+    <div class="workspace-grid">
+      <aside class="card panel">
+        <div class="field">
+          <label for="pdfwm-text">{more.watermark.textLabel}</label>
+          <input id="pdfwm-text" type="text" value={more.watermark.textDefault} data-pdfwm-text />
+        </div>
+        <div class="field">
+          <label for="pdfwm-opacity">
+            <span>{more.watermark.opacityLabel}</span>
+            <span data-pdfwm-opacity-val>22%</span>
+          </label>
+          <input id="pdfwm-opacity" type="range" min="5" max="60" value="22" data-pdfwm-opacity />
+        </div>
+        <div class="field">
+          <label class="checkbox-card" style="background: var(--surface-subtle); border-color: var(--border);">
+            <input type="checkbox" checked data-pdfwm-pagenum />
+            <div><strong>{more.watermark.pageNumLabel}</strong></div>
+          </label>
+        </div>
+        <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 12px;" data-pdfwm-run disabled>
+          {more.watermark.runBtn}
+        </button>
+        <div class="status-banner" data-pdfwm-status></div>
+      </aside>
+
+      <div>
+        <div class="dropzone" data-pdfwm-drop role="button" tabindex="0">
+          <input type="file" accept="application/pdf" hidden data-pdfwm-input />
+          <h2>{more.watermark.dropTitle}</h2>
+          <p>{more.watermark.dropHint}</p>
+          <span class="btn btn-primary btn-sm">{more.watermark.selectFile}</span>
+        </div>
+        <div class="card selected-file-bar" data-pdfwm-info-bar hidden>
+          <span data-pdfwm-info></span>
+          <button type="button" class="btn-remove" data-pdfwm-clear aria-label="Remove PDF">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  import { initPdfTools } from '../scripts/pdf-tools';
+  import { initPdfExtra } from '../scripts/pdf-extra';
+  import { initPdfMore } from '../scripts/pdf-more';
+  const root = document.getElementById('pdf-tools-root');
+  if (root) {
+    initPdfTools(root);
+    initPdfExtra(root);
+    initPdfMore(root);
+  }
+</script>

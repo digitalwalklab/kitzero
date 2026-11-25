@@ -1,0 +1,90 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtraCopy } from '../i18n/extraTools';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtraCopy(locale).heicConverter;
+const labels = {
+  statusReady: copy.statusReady,
+  statusProcessing: copy.statusProcessing,
+  statusDone: copy.statusDone,
+  statusError: copy.statusError,
+  downloadSingle: copy.downloadSingle,
+  convertBtn: copy.convertBtn,
+};
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="image" activeId="heic-converter" />
+
+<div id="heic-converter-root" data-labels={JSON.stringify(labels)}>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="field">
+        <label for="heic-format">{copy.formatLabel}</label>
+        <select id="heic-format" data-heic-format>
+          <option value="image/jpeg" selected>{locale === 'ko' ? 'JPG (권장)' : 'JPG (Recommended)'}</option>
+          <option value="image/webp">WebP</option>
+          <option value="image/png">PNG</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="heic-quality">
+          <span>{copy.qualityLabel}</span>
+          <span data-heic-quality-val>90%</span>
+        </label>
+        <input id="heic-quality" type="range" min="40" max="100" value="90" data-heic-quality />
+      </div>
+
+      <div class="btn-row" style="margin-top: 18px;">
+        <button type="button" class="btn btn-primary" style="flex: 1;" data-heic-run disabled>
+          {copy.convertBtn}
+        </button>
+        <button type="button" class="btn btn-secondary btn-side" data-heic-cancel disabled>
+          {copy.cancelBtn}
+        </button>
+      </div>
+      <div class="btn-row" style="margin-top: 8px;">
+        <button type="button" class="btn btn-trust" style="flex: 1;" data-heic-zip disabled>
+          {copy.downloadZip}
+        </button>
+        <button type="button" class="btn btn-secondary btn-side" data-heic-clear disabled>
+          {copy.clearBtn}
+        </button>
+      </div>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-heic-drop role="button" tabindex="0">
+        <input type="file" accept=".heic,.heif,image/heic,image/heif" multiple hidden data-heic-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFiles}</span>
+      </div>
+      <div class="file-list" data-heic-list></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initHeicConverter } from '../scripts/heic-converter';
+  const root = document.getElementById('heic-converter-root');
+  if (root) initHeicConverter(root);
+</script>

@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ThumbnailResizerView from '../components/ThumbnailResizerView.astro';
+import { translations } from '../i18n/translations';
+
+const t = translations.ko;
+---
+
+<BaseLayout
+  locale="ko"
+  title={t.thumbnailResizer.metaTitle}
+  description={t.thumbnailResizer.metaDesc}
+  activeNav="thumbnail-resizer"
+>
+  <ThumbnailResizerView locale="ko" />
+</BaseLayout>

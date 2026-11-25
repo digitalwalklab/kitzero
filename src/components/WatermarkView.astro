@@ -1,0 +1,139 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtraCopy } from '../i18n/extraTools';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtraCopy(locale).watermark;
+const selectLogoLabel = locale === 'en' ? 'Choose Logo' : '로고 선택';
+const noLogoLabel = locale === 'en' ? 'No logo selected' : '선택된 로고 없음';
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="image" activeId="watermark" />
+
+<div id="watermark-root" data-download-label={copy.downloadSingle} data-no-logo-label={noLogoLabel}>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="field">
+        <label for="wm-type">{copy.typeLabel}</label>
+        <select id="wm-type" data-wm-type>
+          <option value="text" selected>{copy.typeText}</option>
+          <option value="logo">{copy.typeLogo}</option>
+        </select>
+      </div>
+
+      <div class="field" data-wm-text-field>
+        <label for="wm-text">{copy.textLabel}</label>
+        <input id="wm-text" type="text" value={copy.textDefault} data-wm-text />
+      </div>
+
+      <div class="field" data-wm-logo-field hidden>
+        <label for="wm-logo">{copy.logoLabel}</label>
+        <div class="file-picker-box">
+          <input id="wm-logo" type="file" accept="image/*" hidden data-wm-logo-input />
+          <label for="wm-logo" class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
+            {selectLogoLabel}
+          </label>
+          <span class="file-picker-name" data-wm-logo-name>{noLogoLabel}</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="wm-pos">{copy.positionLabel}</label>
+        <select id="wm-pos" data-wm-pos>
+          <option value="bottom-right" selected>{copy.posBottomRight}</option>
+          <option value="bottom-left">{copy.posBottomLeft}</option>
+          <option value="top-right">{copy.posTopRight}</option>
+          <option value="top-left">{copy.posTopLeft}</option>
+          <option value="center">{copy.posCenter}</option>
+          <option value="tile">{copy.posTile}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="wm-size">
+          <span>{copy.sizeLabel}</span>
+          <span data-wm-size-val>5%</span>
+        </label>
+        <input id="wm-size" type="range" min="2" max="15" value="5" data-wm-size />
+      </div>
+
+      <div class="field">
+        <label for="wm-opacity">
+          <span>{copy.opacityLabel}</span>
+          <span data-wm-opacity-val>55%</span>
+        </label>
+        <input id="wm-opacity" type="range" min="10" max="100" value="55" data-wm-opacity />
+      </div>
+
+      <div class="field field-row">
+        <div>
+          <label for="wm-color">{copy.colorLabel}</label>
+          <input id="wm-color" type="color" value="#ffffff" style="height: 40px; padding: 3px;" data-wm-color />
+        </div>
+        <div>
+          <label for="wm-format">{copy.formatLabel}</label>
+          <select id="wm-format" data-wm-format>
+            <option value="image/webp" selected>WebP</option>
+            <option value="image/jpeg">JPG</option>
+            <option value="image/png">PNG</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top: 18px;">
+        <button type="button" class="btn btn-primary" style="flex: 1;" data-wm-apply disabled>
+          {copy.applyBtn}
+        </button>
+      </div>
+      <div class="btn-row" style="margin-top: 8px;">
+        <button type="button" class="btn btn-trust" style="flex: 1;" data-wm-zip disabled>
+          {copy.downloadZip}
+        </button>
+        <button type="button" class="btn btn-secondary btn-side" data-wm-clear disabled>
+          {copy.clearBtn}
+        </button>
+      </div>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-wm-drop role="button" tabindex="0">
+        <input type="file" accept="image/*" multiple hidden data-wm-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFiles}</span>
+      </div>
+
+      <div class="canvas-stage" style="margin-top: 16px;" data-wm-preview-wrap hidden>
+        <div style="font-size: 0.84rem; font-weight: 600; color: var(--ink-muted); margin-bottom: 10px;">
+          {copy.previewTitle}
+        </div>
+        <canvas data-wm-preview style="cursor: default;"></canvas>
+      </div>
+
+      <div class="file-list" data-wm-list></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initWatermark } from '../scripts/watermark';
+  const root = document.getElementById('watermark-root');
+  if (root) initWatermark(root);
+</script>

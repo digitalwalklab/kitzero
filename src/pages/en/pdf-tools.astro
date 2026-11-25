@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PdfToolsView from '../../components/PdfToolsView.astro';
+import { translations } from '../../i18n/translations';
+
+const t = translations.en;
+---
+
+<BaseLayout
+  locale="en"
+  title={t.pdfTools.metaTitle}
+  description={t.pdfTools.metaDesc}
+  activeNav="pdf-tools"
+>
+  <PdfToolsView locale="en" />
+</BaseLayout>

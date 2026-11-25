@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ImageBlurView from '../../components/ImageBlurView.astro';
+import { getExtraCopy } from '../../i18n/extraTools';
+const copy = getExtraCopy('en').imageBlur;
+---
+<BaseLayout locale="en" title={copy.metaTitle} description={copy.metaDesc} activeNav="image-blur">
+  <ImageBlurView locale="en" />
+</BaseLayout>

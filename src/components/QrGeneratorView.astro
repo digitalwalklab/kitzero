@@ -1,0 +1,134 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtraCopy } from '../i18n/extraTools';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtraCopy(locale).qrGenerator;
+const selectFileLabel = locale === 'en' ? 'Choose Image' : '이미지 선택';
+const noFileLabel = locale === 'en' ? 'No logo selected' : '선택된 로고 없음';
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="utility" activeId="qr-generator" />
+
+<div id="qr-generator-root" data-no-file-label={noFileLabel}>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="segmented-control" role="tablist">
+        <button type="button" class="segmented-btn active" role="tab" data-qr-mode="url">{copy.modeUrl}</button>
+        <button type="button" class="segmented-btn" role="tab" data-qr-mode="wifi">{copy.modeWifi}</button>
+      </div>
+
+      <div data-qr-panel="url">
+        <div class="field">
+          <label for="qr-text">{copy.textLabel}</label>
+          <input id="qr-text" type="text" value={copy.textPlaceholder} placeholder={copy.textPlaceholder} data-qr-text />
+        </div>
+      </div>
+
+      <div data-qr-panel="wifi" hidden>
+        <div class="field">
+          <label for="qr-ssid">{copy.wifiSsid}</label>
+          <input id="qr-ssid" type="text" placeholder="MyHomeWiFi" data-qr-ssid />
+        </div>
+        <div class="field">
+          <label for="qr-pass">{copy.wifiPass}</label>
+          <input id="qr-pass" type="text" placeholder="••••••••" data-qr-pass />
+        </div>
+        <div class="field">
+          <label for="qr-enc">{copy.wifiEnc}</label>
+          <select id="qr-enc" data-qr-enc>
+            <option value="WPA" selected>WPA / WPA2 / WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">{locale === 'ko' ? '개방형 (비밀번호 없음)' : 'Open (No password)'}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field field-row">
+        <div>
+          <label for="qr-fg">{copy.fgLabel}</label>
+          <input id="qr-fg" type="color" value="#0f172a" style="height: 40px; padding: 3px;" data-qr-fg />
+        </div>
+        <div>
+          <label for="qr-bg">{copy.bgLabel}</label>
+          <input id="qr-bg" type="color" value="#ffffff" style="height: 40px; padding: 3px;" data-qr-bg />
+        </div>
+      </div>
+
+      <div class="field field-row">
+        <div>
+          <label for="qr-size">{copy.sizeLabel}</label>
+          <select id="qr-size" data-qr-size>
+            <option value="320">320 × 320</option>
+            <option value="512" selected>512 × 512</option>
+            <option value="1024">1024 × 1024</option>
+          </select>
+        </div>
+        <div>
+          <label for="qr-ecc">{copy.eccLabel}</label>
+          <select id="qr-ecc" data-qr-ecc>
+            <option value="L">L (7%)</option>
+            <option value="M" selected>M (15%)</option>
+            <option value="Q">Q (25%)</option>
+            <option value="H">H (30%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="qr-logo">{copy.logoLabel}</label>
+        <div class="file-picker-box">
+          <input id="qr-logo" type="file" accept="image/*" hidden data-qr-logo />
+          <label for="qr-logo" class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
+            {selectFileLabel}
+          </label>
+          <span class="file-picker-name" data-qr-logo-name>{noFileLabel}</span>
+          <button
+            type="button"
+            class="btn-remove"
+            data-qr-clear-logo
+            disabled
+            aria-label={copy.clearLogo}
+            title={copy.clearLogo}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="canvas-stage">
+      <canvas data-qr-canvas class="qr-canvas"></canvas>
+      <div class="btn-row" style="margin-top: 22px;">
+        <button type="button" class="btn btn-primary" data-qr-dl-png>{copy.downloadPng}</button>
+        <button type="button" class="btn btn-trust" data-qr-dl-svg>{copy.downloadSvg}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initQrGenerator } from '../scripts/qr-generator';
+  const root = document.getElementById('qr-generator-root');
+  if (root) initQrGenerator(root);
+</script>

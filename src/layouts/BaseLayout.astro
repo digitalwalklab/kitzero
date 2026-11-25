@@ -1,0 +1,526 @@
+---
+import '../styles/global.css';
+import ToolIcon from '../components/ToolIcon.astro';
+import { translations, getAlternatePath, type Locale } from '../i18n/translations';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  activeNav?:
+    | 'home'
+    | 'image-optimizer'
+    | 'thumbnail-resizer'
+    | 'image-crop'
+    | 'image-blur'
+    | 'heic-converter'
+    | 'watermark'
+    | 'pdf-tools'
+    | 'pdf-sign'
+    | 'qr-generator'
+    | 'favicon-generator'
+    | 'svg-converter'
+    | 'privacy';
+}
+
+const { locale, title, description, activeNav = 'home' } = Astro.props;
+const t = translations[locale];
+const currentPath = Astro.url.pathname;
+const koPath = getAlternatePath(currentPath, 'ko');
+const enPath = getAlternatePath(currentPath, 'en');
+const siteOrigin = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kitzero.jokerx04.com';
+const canonicalUrl = `${siteOrigin}${currentPath}`;
+const koUrl = `${siteOrigin}${koPath}`;
+const enUrl = `${siteOrigin}${enPath}`;
+const ogImageUrl = `${siteOrigin}/og-image.png`;
+const prefix = locale === 'en' ? '/en' : '';
+const homeUrl = `${siteOrigin}${prefix ? `${prefix}/` : '/'}`;
+
+const imageTools = t.tools.filter((tool) => tool.category === 'image');
+const pdfTools = t.tools.filter((tool) => tool.category === 'pdf');
+const utilityTools = t.tools.filter((tool) => tool.category === 'utility');
+const isImageActive =
+  activeNav === 'image-optimizer' ||
+  activeNav === 'thumbnail-resizer' ||
+  activeNav === 'image-crop' ||
+  activeNav === 'image-blur' ||
+  activeNav === 'heic-converter' ||
+  activeNav === 'watermark';
+const isPdfActive = activeNav === 'pdf-tools' || activeNav === 'pdf-sign';
+const isUtilityActive =
+  activeNav === 'qr-generator' || activeNav === 'favicon-generator' || activeNav === 'svg-converter';
+
+const navLabelMap: Record<NonNullable<Props['activeNav']>, string> = {
+  home: t.nav.home,
+  'image-optimizer': t.nav.imageOptimizer,
+  'thumbnail-resizer': t.nav.thumbnailResizer,
+  'image-crop': locale === 'ko' ? '이미지 자르기 · 회전 · 반전' : 'Image Crop, Rotate & Flip',
+  'image-blur': locale === 'ko' ? '모자이크 · 블러 가리기' : 'Mosaic & Blur Redactor',
+  'heic-converter': locale === 'ko' ? '아이폰 HEIC 변환기' : 'HEIC Converter',
+  watermark: locale === 'ko' ? '이미지 워터마크' : 'Batch Watermark',
+  'pdf-tools': t.nav.pdfTools,
+  'pdf-sign': locale === 'ko' ? 'PDF 전자서명 · 도장 찍기' : 'Sign & Stamp PDF',
+  'qr-generator': locale === 'ko' ? 'QR 코드 생성기' : 'QR Code Generator',
+  'favicon-generator': locale === 'ko' ? '파비콘 생성기' : 'Favicon Generator',
+  'svg-converter': locale === 'ko' ? 'SVG → PNG · WebP 변환기' : 'SVG Converter',
+  privacy: t.nav.privacy,
+};
+
+const categoryMeta = isImageActive
+  ? { key: 'image', label: t.nav.imageMenu, url: `${prefix ? `${prefix}/` : '/'}?cat=image#tools` }
+  : isPdfActive
+    ? { key: 'pdf', label: t.nav.pdfMenu, url: `${prefix ? `${prefix}/` : '/'}?cat=pdf#tools` }
+    : isUtilityActive
+      ? { key: 'utility', label: t.nav.utilityMenu, url: `${prefix ? `${prefix}/` : '/'}?cat=utility#tools` }
+      : null;
+
+const breadcrumbItems =
+  activeNav === 'home'
+    ? [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: locale === 'ko' ? 'KitZero(킷제로) 홈' : 'KitZero Home',
+          item: homeUrl,
+        },
+      ]
+    : categoryMeta
+      ? [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: locale === 'ko' ? '홈' : 'Home',
+            item: homeUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: categoryMeta.label,
+            item: `${siteOrigin}${categoryMeta.url}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: navLabelMap[activeNav],
+            item: canonicalUrl,
+          },
+        ]
+      : [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: locale === 'ko' ? '홈' : 'Home',
+            item: homeUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: navLabelMap[activeNav],
+            item: canonicalUrl,
+          },
+        ];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteOrigin}/#website`,
+      name: 'KitZero',
+      alternateName: ['킷제로', 'KitZero Local Tools'],
+      url: siteOrigin,
+      inLanguage: ['ko', 'en'],
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${canonicalUrl}#app`,
+      name: activeNav === 'home' ? 'KitZero (킷제로)' : `${navLabelMap[activeNav]} — KitZero`,
+      alternateName: '킷제로',
+      description,
+      url: canonicalUrl,
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Any (Web Browser)',
+      browserRequirements: 'Requires JavaScript and HTML5 Canvas',
+      isAccessibleForFree: true,
+      inLanguage: t.htmlLang,
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbItems,
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#1e3a5f" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={locale === 'ko' ? 'KitZero (킷제로) RSS' : 'KitZero RSS'}
+      href={locale === 'ko' ? '/rss.xml' : '/en/rss.xml'}
+    />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="ko" href={koUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={locale === 'ko' ? 'ko_KR' : 'en_US'} />
+    <meta property="og:locale:alternate" content={locale === 'ko' ? 'en_US' : 'ko_KR'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={locale === 'ko' ? 'KitZero (킷제로)' : 'KitZero'} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem('kitzero-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href={prefix ? `${prefix}/` : '/'} class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 64 64" fill="none">
+              <path d="M12 18V46M12 32L26 18M19 26L28 46" stroke="#F8FAFC" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+              <rect x="35" y="19" width="17" height="26" rx="8.5" stroke="#22C55E" stroke-width="5.6" />
+              <line x1="40" y1="37" x2="47" y2="27" stroke="#38BDF8" stroke-width="3.6" stroke-linecap="round" />
+            </svg>
+          </span>
+          <span>{t.siteName}</span>
+        </a>
+
+        <!-- Desktop Category Mega-Menu Nav -->
+        <nav class="header-nav-desktop" aria-label="Main navigation">
+          <a href={prefix ? `${prefix}/` : '/'} class:list={['nav-link', { active: activeNav === 'home' }]}>
+            {t.nav.allTools}
+          </a>
+
+          <div class="nav-dropdown" data-dropdown>
+            <button
+              type="button"
+              class:list={['nav-link nav-dropdown-trigger', { active: isImageActive }]}
+              aria-expanded="false"
+              data-dropdown-btn
+            >
+              <span>{t.nav.imageMenu}</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="dropdown-panel" role="menu">
+              {imageTools.map((tool) => (
+                <a href={tool.slug} class="dropdown-item" role="menuitem">
+                  <span class={`tool-icon-sm accent-${tool.accent}`}>
+                    <ToolIcon id={tool.id} size={17} />
+                  </span>
+                  <span>
+                    <strong>{tool.shortTitle}</strong>
+                    <small>{tool.shortDesc}</small>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div class="nav-dropdown" data-dropdown>
+            <button
+              type="button"
+              class:list={['nav-link nav-dropdown-trigger', { active: isPdfActive }]}
+              aria-expanded="false"
+              data-dropdown-btn
+            >
+              <span>{t.nav.pdfMenu}</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="dropdown-panel" role="menu">
+              {pdfTools.map((tool) => (
+                <a href={tool.slug} class="dropdown-item" role="menuitem">
+                  <span class={`tool-icon-sm accent-${tool.accent}`}>
+                    <ToolIcon id={tool.id} size={17} />
+                  </span>
+                  <span>
+                    <strong>{tool.shortTitle}</strong>
+                    <small>{tool.shortDesc}</small>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+          <div class="nav-dropdown" data-dropdown>
+            <button
+              type="button"
+              class:list={['nav-link nav-dropdown-trigger', { active: isUtilityActive }]}
+              aria-expanded="false"
+              data-dropdown-btn
+            >
+              <span>{t.nav.utilityMenu}</span>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="dropdown-panel" role="menu">
+              {utilityTools.map((tool) => (
+                <a href={tool.slug} class="dropdown-item" role="menuitem">
+                  <span class={`tool-icon-sm accent-${tool.accent}`}>
+                    <ToolIcon id={tool.id} size={17} />
+                  </span>
+                  <span>
+                    <strong>{tool.shortTitle}</strong>
+                    <small>{tool.shortDesc}</small>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </nav>
+
+        <div class="header-actions">
+          <span class="trust-pill" title={t.localBadge}>
+            <span class="trust-dot" aria-hidden="true"></span>
+            {t.localBadgeShort}
+          </span>
+          <button
+            type="button"
+            class="theme-toggle"
+            id="theme-toggle"
+            aria-label={locale === 'en' ? 'Toggle light and dark theme' : '라이트/다크 모드 전환'}
+            title={locale === 'en' ? 'Toggle theme' : '테마 전환'}
+          >
+            <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+            <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+          </button>
+          <div class="lang-switch" aria-label="Language switcher">
+            <a href={koPath} class:list={[{ current: locale === 'ko' }]} hreflang="ko">KO</a>
+            <a href={enPath} class:list={[{ current: locale === 'en' }]} hreflang="en">EN</a>
+          </div>
+          <button
+            type="button"
+            class="mobile-menu-btn"
+            id="mobile-menu-btn"
+            aria-expanded="false"
+            aria-controls="mobile-drawer"
+            aria-label={locale === 'en' ? 'Open tools menu' : '도구 메뉴 열기'}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true">
+              <line x1="4" y1="7" x2="20" y2="7" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="17" x2="20" y2="17" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Drawer -->
+      <div class="mobile-drawer" id="mobile-drawer" hidden>
+        <div class="container mobile-drawer-inner">
+          <div class="mobile-group-label">{t.nav.imageMenu}</div>
+          <div class="mobile-group-list">
+            {imageTools.map((tool) => (
+              <a href={tool.slug} class="dropdown-item">
+                <span class={`tool-icon-sm accent-${tool.accent}`}>
+                  <ToolIcon id={tool.id} size={17} />
+                </span>
+                <span>
+                  <strong>{tool.shortTitle}</strong>
+                  <small>{tool.shortDesc}</small>
+                </span>
+              </a>
+            ))}
+          </div>
+          <div class="mobile-group-label">{t.nav.pdfMenu}</div>
+          <div class="mobile-group-list">
+            {pdfTools.map((tool) => (
+              <a href={tool.slug} class="dropdown-item">
+                <span class={`tool-icon-sm accent-${tool.accent}`}>
+                  <ToolIcon id={tool.id} size={17} />
+                </span>
+                <span>
+                  <strong>{tool.shortTitle}</strong>
+                  <small>{tool.shortDesc}</small>
+                </span>
+              </a>
+            ))}
+          </div>
+          <div class="mobile-group-label">{t.nav.utilityMenu}</div>
+          <div class="mobile-group-list">
+            {utilityTools.map((tool) => (
+              <a href={tool.slug} class="dropdown-item">
+                <span class={`tool-icon-sm accent-${tool.accent}`}>
+                  <ToolIcon id={tool.id} size={17} />
+                </span>
+                <span>
+                  <strong>{tool.shortTitle}</strong>
+                  <small>{tool.shortDesc}</small>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        {activeNav !== 'home' && (
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <ol>
+              <li>
+                <a href={prefix ? `${prefix}/` : '/'}>{locale === 'ko' ? '홈' : 'Home'}</a>
+              </li>
+              {categoryMeta && (
+                <li>
+                  <span class="breadcrumb-sep" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </span>
+                  <a href={categoryMeta.url}>{categoryMeta.label}</a>
+                </li>
+              )}
+              <li>
+                <span class="breadcrumb-sep" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </span>
+                <span class="breadcrumb-current" aria-current="page" data-breadcrumb-current>
+                  {navLabelMap[activeNav]}
+                </span>
+              </li>
+            </ol>
+          </nav>
+        )}
+        <slot />
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <div><strong>{locale === 'ko' ? 'KitZero (킷제로)' : 'KitZero'}</strong> — {t.footer.guarantee}</div>
+          <div style="margin-top: 4px; color: var(--ink-muted); font-size: 0.8rem;">{t.footer.copyright}</div>
+        </div>
+        <div class="footer-links">
+          <a href={`${prefix}/privacy/`}>{t.footer.privacyLink}</a>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      (() => {
+        // Theme toggle
+        const themeBtn = document.getElementById('theme-toggle');
+        if (themeBtn) {
+          themeBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('kitzero-theme', next);
+          });
+        }
+
+        // Category dropdowns
+        const dropdowns = Array.from(document.querySelectorAll('[data-dropdown]'));
+        function closeAllDropdowns() {
+          dropdowns.forEach((d) => {
+            d.classList.remove('open');
+            const trigger = d.querySelector('[data-dropdown-btn]');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          });
+        }
+
+        dropdowns.forEach((d) => {
+          const trigger = d.querySelector('[data-dropdown-btn]');
+          if (!trigger) return;
+          trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const willOpen = !d.classList.contains('open');
+            closeAllDropdowns();
+            if (willOpen) {
+              d.classList.add('open');
+              trigger.setAttribute('aria-expanded', 'true');
+            }
+          });
+        });
+
+        document.addEventListener('click', closeAllDropdowns);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            closeAllDropdowns();
+            if (mobileDrawer && !mobileDrawer.hidden) {
+              mobileDrawer.hidden = true;
+              mobileBtn?.setAttribute('aria-expanded', 'false');
+            }
+          }
+        });
+
+        // Mobile drawer
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        if (mobileBtn && mobileDrawer) {
+          mobileBtn.addEventListener('click', () => {
+            const isHidden = mobileDrawer.hidden;
+            mobileDrawer.hidden = !isHidden;
+            mobileBtn.setAttribute('aria-expanded', String(isHidden));
+          });
+        }
+
+        // PWA Service Worker registration
+        if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

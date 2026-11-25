@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WatermarkView from '../components/WatermarkView.astro';
+import { getExtraCopy } from '../i18n/extraTools';
+const copy = getExtraCopy('ko').watermark;
+---
+<BaseLayout locale="ko" title={copy.metaTitle} description={copy.metaDesc} activeNav="watermark">
+  <WatermarkView locale="ko" />
+</BaseLayout>

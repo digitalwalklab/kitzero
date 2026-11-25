@@ -1,0 +1,35 @@
+---
+import ToolIcon from './ToolIcon.astro';
+import { translations, type Locale, type ToolCategory, type ToolSummary } from '../i18n/translations';
+
+interface Props {
+  locale: Locale;
+  category: ToolCategory;
+  activeId: ToolSummary['id'];
+}
+
+const { locale, category, activeId } = Astro.props;
+const tools = translations[locale].tools.filter((t) => t.category === category);
+---
+
+<nav class="tool-subnav" aria-label="Category tools" data-tool-subnav>
+  {tools.map((tool) => (
+    <a href={tool.slug} class:list={['tool-subtab', { active: tool.id === activeId }]} aria-current={tool.id === activeId ? 'page' : undefined}>
+      <span class={`tool-subtab-icon accent-${tool.accent}`}>
+        <ToolIcon id={tool.id} size={15} />
+      </span>
+      <span>{tool.shortTitle}</span>
+    </a>
+  ))}
+</nav>
+
+<script is:inline>
+  (() => {
+    const nav = document.querySelector('[data-tool-subnav]');
+    const active = nav?.querySelector('.tool-subtab.active');
+    if (nav && active) {
+      const targetLeft = active.offsetLeft - (nav.clientWidth - active.clientWidth) / 2;
+      nav.scrollLeft = Math.max(0, targetLeft);
+    }
+  })();
+</script>

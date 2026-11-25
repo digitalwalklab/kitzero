@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ImageOptimizerView from '../../components/ImageOptimizerView.astro';
+import { translations } from '../../i18n/translations';
+
+const t = translations.en;
+---
+
+<BaseLayout
+  locale="en"
+  title={t.imageOptimizer.metaTitle}
+  description={t.imageOptimizer.metaDesc}
+  activeNav="image-optimizer"
+>
+  <ImageOptimizerView locale="en" />
+</BaseLayout>
