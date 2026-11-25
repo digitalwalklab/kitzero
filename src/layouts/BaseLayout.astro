@@ -497,20 +497,27 @@ const jsonLd = {
           if (e.key === 'Escape') {
             closeAllDropdowns();
             if (mobileDrawer && !mobileDrawer.hidden) {
-              mobileDrawer.hidden = true;
-              mobileBtn?.setAttribute('aria-expanded', 'false');
+              setMobileDrawer(false);
             }
           }
         });
 
-        // Mobile drawer
+        // Mobile drawer with background scroll lock
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mobileDrawer = document.getElementById('mobile-drawer');
+        function setMobileDrawer(open) {
+          if (!mobileBtn || !mobileDrawer) return;
+          mobileDrawer.hidden = !open;
+          mobileBtn.setAttribute('aria-expanded', String(open));
+          document.body.classList.toggle('drawer-open', open);
+          if (open) mobileDrawer.scrollTop = 0;
+        }
         if (mobileBtn && mobileDrawer) {
           mobileBtn.addEventListener('click', () => {
-            const isHidden = mobileDrawer.hidden;
-            mobileDrawer.hidden = !isHidden;
-            mobileBtn.setAttribute('aria-expanded', String(isHidden));
+            setMobileDrawer(mobileDrawer.hidden);
+          });
+          mobileDrawer.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => setMobileDrawer(false));
           });
         }
 

@@ -117,16 +117,97 @@ export function initImageBlur(root: HTMLElement): void {
       return;
     }
 
-    // Blur
-    const radius = Math.max(4, Math.round(region.strength * 0.9));
+    // Cross-browser smooth Gaussian-like blur (works on iOS Safari / in-app WebViews where ctx.filter is ignored)
+    const maxDim = Math.max(w, h);
+    const scale = maxDim > 480 ? 480 / maxDim : 1;
+    const bw = Math.max(2, Math.round(w * scale));
+    const bh = Math.max(2, Math.round(h * scale));
+    const radius = Math.max(2, Math.round(region.strength * 0.45 * scale * (Math.min(canvas.width, canvas.height) / 600 + 0.6)));
+    const clampedRadius = Math.min(radius, Math.max(2, Math.floor(Math.min(bw, bh) / 2)));
+
     const tmp = document.createElement('canvas');
-    tmp.width = w;
-    tmp.height = h;
+    tmp.width = bw;
+    tmp.height = bh;
     const tctx = tmp.getContext('2d')!;
-    tctx.filter = `blur(${radius}px)`;
-    tctx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
-    ctx.drawImage(tmp, x, y);
+    tctx.imageSmoothingEnabled = true;
+    tctx.drawImage(canvas, x, y, w, h, 0, 0, bw, bh);
+
+    const imgData = tctx.getImageData(0, 0, bw, bh);
+    boxBlurRgba(imgData.data, bw, bh, clampedRadius, 3);
+    tctx.putImageData(imgData, 0, 0);
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(tmp, 0, 0, bw, bh, x, y, w, h);
+    ctx.restore();
     releaseCanvas(tmp);
+  }
+
+  function boxBlurRgba(data: Uint8ClampedArray, w: number, h: number, radius: number, passes: number): void {
+    const tmp = new Uint8ClampedArray(data.length);
+    const win = radius * 2 + 1;
+
+    for (let p = 0; p < passes; p++) {
+      // Horizontal pass
+      for (let y = 0; y < h; y++) {
+        const row = y * w * 4;
+        let r = 0, g = 0, b = 0, a = 0;
+        for (let k = -radius; k <= radius; k++) {
+          const sx = Math.max(0, Math.min(w - 1, k));
+          const idx = row + sx * 4;
+          r += data[idx];
+          g += data[idx + 1];
+          b += data[idx + 2];
+          a += data[idx + 3];
+        }
+        for (let x = 0; x < w; x++) {
+          const out = row + x * 4;
+          tmp[out] = r / win;
+          tmp[out + 1] = g / win;
+          tmp[out + 2] = b / win;
+          tmp[out + 3] = a / win;
+
+          const left = Math.max(0, x - radius);
+          const right = Math.min(w - 1, x + radius + 1);
+          const lIdx = row + left * 4;
+          const rIdx = row + right * 4;
+          r += data[rIdx] - data[lIdx];
+          g += data[rIdx + 1] - data[lIdx + 1];
+          b += data[rIdx + 2] - data[lIdx + 2];
+          a += data[rIdx + 3] - data[lIdx + 3];
+        }
+      }
+
+      // Vertical pass
+      for (let x = 0; x < w; x++) {
+        let r = 0, g = 0, b = 0, a = 0;
+        for (let k = -radius; k <= radius; k++) {
+          const sy = Math.max(0, Math.min(h - 1, k));
+          const idx = (sy * w + x) * 4;
+          r += tmp[idx];
+          g += tmp[idx + 1];
+          b += tmp[idx + 2];
+          a += tmp[idx + 3];
+        }
+        for (let y = 0; y < h; y++) {
+          const out = (y * w + x) * 4;
+          data[out] = r / win;
+          data[out + 1] = g / win;
+          data[out + 2] = b / win;
+          data[out + 3] = a / win;
+
+          const top = Math.max(0, y - radius);
+          const bot = Math.min(h - 1, y + radius + 1);
+          const tIdx = (top * w + x) * 4;
+          const bIdx = (bot * w + x) * 4;
+          r += tmp[bIdx] - tmp[tIdx];
+          g += tmp[bIdx + 1] - tmp[tIdx + 1];
+          b += tmp[bIdx + 2] - tmp[tIdx + 2];
+          a += tmp[bIdx + 3] - tmp[tIdx + 3];
+        }
+      }
+    }
   }
 
   function redraw(): void {
@@ -161,7 +242,12 @@ export function initImageBlur(root: HTMLElement): void {
 
   canvas.addEventListener('pointerdown', (e) => {
     if (!sourceImg) return;
-    canvas.setPointerCapture(e.pointerId);
+    e.preventDefault();
+    try {
+      canvas.setPointerCapture(e.pointerId);
+    } catch {
+      // Some mobile browsers throw if pointerId is synthetic
+    }
     const pos = getCanvasCoords(e);
     dragging = true;
     startX = pos.x;
@@ -171,6 +257,7 @@ export function initImageBlur(root: HTMLElement): void {
 
   canvas.addEventListener('pointermove', (e) => {
     if (!dragging) return;
+    e.preventDefault();
     const pos = getCanvasCoords(e);
     currentRect = {
       x: Math.min(startX, pos.x),
@@ -181,7 +268,7 @@ export function initImageBlur(root: HTMLElement): void {
     redraw();
   });
 
-  canvas.addEventListener('pointerup', () => {
+  function finishDrag(): void {
     if (!dragging) return;
     dragging = false;
     if (currentRect && currentRect.w >= 4 && currentRect.h >= 4) {
@@ -193,7 +280,10 @@ export function initImageBlur(root: HTMLElement): void {
     }
     currentRect = null;
     redraw();
-  });
+  }
+
+  canvas.addEventListener('pointerup', finishDrag);
+  canvas.addEventListener('pointercancel', finishDrag);
 
   undoBtn.addEventListener('click', () => {
     regions.pop();

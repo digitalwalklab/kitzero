@@ -337,10 +337,23 @@ select {
 }
 
 .mobile-drawer {
+  position: fixed;
+  top: 65px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   border-top: 1px solid var(--border);
   background: var(--surface);
-  padding: 14px 0 20px;
-  box-shadow: var(--shadow-md);
+  padding: 16px 0 40px;
+}
+
+body.drawer-open {
+  overflow: hidden;
 }
 
 .mobile-group-label {
@@ -1629,6 +1642,9 @@ main {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   cursor: crosshair;
 }
 
