@@ -2,4 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://kitzero.jokerx04.com/sitemap.xml
-Sitemap: https://kitzero.jokerx04.com/sitemap-index.xml
