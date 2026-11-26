@@ -11,5 +11,6 @@ export default defineConfig({
   },
   build: {
     format: 'directory',
+    inlineStylesheets: 'always',
   },
 });

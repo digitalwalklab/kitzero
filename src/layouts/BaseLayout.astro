@@ -136,23 +136,40 @@ const jsonLd = {
       content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.google.com https://*.gstatic.com https://*.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.gstatic.com https://*.adtrafficquality.google; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google; worker-src 'self' blob:; connect-src 'self' blob: data: https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google; object-src 'none'; base-uri 'self'; form-action 'self';"
     />
     <meta name="google-adsense-account" content="ca-pub-1437145358254272" />
-    {!isNotFound && (
-      <script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1437145358254272"
-        crossorigin="anonymous"
-      ></script>
-    )}
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W4VQ434K0S"></script>
-    <script is:inline>
-      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          window.dataLayer.push(arguments);
+    <script is:inline define:vars={{ loadAdsense: !isNotFound }}>
+      (() => {
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+        let loaded = false;
+        function loadThirdParty() {
+          if (loaded) return;
+          loaded = true;
+          const ga = document.createElement('script');
+          ga.async = true;
+          ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-W4VQ434K0S';
+          document.head.appendChild(ga);
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            window.dataLayer.push(arguments);
+          }
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-W4VQ434K0S');
+
+          if (loadAdsense) {
+            const ads = document.createElement('script');
+            ads.async = true;
+            ads.crossOrigin = 'anonymous';
+            ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1437145358254272';
+            document.head.appendChild(ads);
+          }
         }
-        gtag('js', new Date());
-        gtag('config', 'G-W4VQ434K0S');
-      }
+        ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((evt) => {
+          window.addEventListener(evt, loadThirdParty, { once: true, passive: true });
+        });
+        window.addEventListener('load', () => {
+          setTimeout(loadThirdParty, 2500);
+        });
+      })();
     </script>
     <meta name="robots" content={isNotFound ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
     <meta name="google-site-verification" content="ck7xOhJMnQ__OUVVjJ-MZ_nw_WjEqoUK80U7QlBogww" />
