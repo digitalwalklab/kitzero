@@ -249,7 +249,7 @@ export const translations: Record<Locale, TranslationDict> = {
     },
     home: {
       metaTitle: 'KitZero(킷제로) — 서버에 올리지 않는 무료 이미지·PDF 변환기',
-      metaDesc: '사진 압축, 모자이크, 여권사진, HEIC 변환, PDF 합치기·분할·서명, 글자 수 세기까지 21가지 도구를 외부 서버 전송 없이 내 PC·스마트폰에서 안전하게 무료 처리하세요.',
+      metaDesc: '사진 압축·모자이크·여권사진·HEIC부터 PDF 합치기·서명·글자 수 세기까지 21종 도구를 서버 업로드 없이 무료로 쓰세요.',
       heroTitle: '남의 서버에 올리기 불안해서,\n내가 쓰려고 만들었습니다',
       heroSubtitle: '사진·PDF 도구 21종, 외부 전송 없이 내 기기 안에서만 안전하게 처리됩니다.',
       trustPoints: [
