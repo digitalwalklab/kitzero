@@ -1,13 +1,12 @@
-import { PDFDocument } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
+import { loadPdfJs, loadPdfLib } from './pdf-loaders';
 import {
-  bindDropzoneKeyboard,
+  bindDropzone,
   loadImageFromFile,
   stripExtension,
   triggerDownload,
 } from './utils';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 interface PlacedMark {
   pageIndex: number; // 0-based
@@ -45,7 +44,7 @@ export function initPdfSign(root: HTMLElement): void {
   let mode: 'draw' | 'stamp' = 'draw';
   let pdfFile: File | null = null;
   let pdfBytes: Uint8Array | null = null;
-  let pdfProxy: pdfjsLib.PDFDocumentProxy | null = null;
+  let pdfProxy: PDFDocumentProxy | null = null;
   let currentPage = 1;
   let basePageImg: HTMLCanvasElement | null = null;
   let marks: PlacedMark[] = [];
@@ -118,34 +117,16 @@ export function initPdfSign(root: HTMLElement): void {
     URL.revokeObjectURL(objectUrl);
   });
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
+  bindDropzone(dropzone, fileInput, (files) => {
+    if (files[0]) void loadPdf(files[0]);
   });
-  bindDropzoneKeyboard(dropzone, fileInput);
   changeBtn.addEventListener('click', () => fileInput.click());
-
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files?.[0]) void loadPdf(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files?.[0]) {
-      void loadPdf(fileInput.files[0]);
-      fileInput.value = '';
-    }
-  });
 
   async function loadPdf(file: File): Promise<void> {
     if (pdfProxy) await pdfProxy.destroy();
     pdfFile = file;
     pdfBytes = new Uint8Array(await file.arrayBuffer());
+    const pdfjsLib = await loadPdfJs();
     pdfProxy = await pdfjsLib.getDocument({ data: pdfBytes.slice() }).promise;
     currentPage = 1;
     marks = [];
@@ -246,6 +227,7 @@ export function initPdfSign(root: HTMLElement): void {
     if (!pdfFile || !pdfBytes) return;
     saveBtn.disabled = true;
     try {
+      const { PDFDocument } = await loadPdfLib();
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const pages = pdfDoc.getPages();
 

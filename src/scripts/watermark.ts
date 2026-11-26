@@ -1,7 +1,6 @@
 import JSZip from 'jszip';
 import {
-  bindClipboardImagePaste,
-  bindDropzoneKeyboard,
+  bindDropzone,
   extensionFromMime,
   formatBytes,
   generateAndDownloadZip,
@@ -76,30 +75,7 @@ export function initWatermark(root: HTMLElement): void {
     void renderPreview();
   });
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  bindClipboardImagePaste((files) => {
-    addFiles(files);
-  });
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files) addFiles(Array.from(e.dataTransfer.files));
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files) {
-      addFiles(Array.from(fileInput.files));
-      fileInput.value = '';
-    }
-  });
+  bindDropzone(dropzone, fileInput, (files) => addFiles(files), { pasteImages: true });
 
   function addFiles(files: File[]): void {
     const valid = files.filter((f) => f.type.startsWith('image/'));

@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import {
-  bindDropzoneKeyboard,
+  bindDropzone,
   extensionFromMime,
   formatBytes,
   generateAndDownloadZip,
@@ -54,27 +54,7 @@ export function initHeicConverter(root: HTMLElement): void {
     cancelBtn.disabled = true;
   });
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files) addFiles(Array.from(e.dataTransfer.files));
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files) {
-      addFiles(Array.from(fileInput.files));
-      fileInput.value = '';
-    }
-  });
+  bindDropzone(dropzone, fileInput, (files) => addFiles(files));
 
   function addFiles(files: File[]): void {
     const valid = files.filter((f) => /\.(heic|heif)$/i.test(f.name) || f.type.includes('heic') || f.type.includes('heif'));

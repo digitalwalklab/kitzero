@@ -18,6 +18,8 @@ export const extraTools2Copy = {
         progressText: '압축 중',
         doneMsg: 'PDF 압축이 완료되어 다운로드되었습니다.',
         cancelledMsg: '압축이 중단되었습니다.',
+        alreadyOptimalMsg: '이미 최적화된 PDF라 용량을 더 줄일 수 없습니다. 원본 파일을 그대로 사용하세요 (텍스트 위주 PDF는 이미지 재압축 시 용량이 오히려 늘어날 수 있습니다).',
+        losslessTag: '무손실 구조 최적화',
       },
       watermark: {
         dropTitle: '워터마크나 페이지 번호를 넣을 PDF를 선택하세요',
@@ -108,6 +110,8 @@ export const extraTools2Copy = {
         progressText: 'Compressing',
         doneMsg: 'Compressed PDF has been downloaded.',
         cancelledMsg: 'Compression stopped.',
+        alreadyOptimalMsg: 'This PDF is already well-optimized and cannot be shrunk further—keeping the original file (text-based PDFs often grow larger when rasterized).',
+        losslessTag: 'lossless optimization',
       },
       watermark: {
         dropTitle: 'Drop a PDF file to add a watermark or page numbers',

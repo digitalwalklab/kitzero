@@ -1,9 +1,9 @@
 import {
-  bindClipboardImagePaste,
-  bindDropzoneKeyboard,
+  bindDropzone,
   extensionFromMime,
   loadImageFromFile,
   releaseCanvas,
+  setStatusBanner,
   triggerDownload,
 } from './utils';
 
@@ -52,12 +52,8 @@ export function initIdPhoto(root: HTMLElement): void {
   let startOffsetX = 0;
   let startOffsetY = 0;
 
-  function setStatus(type: 'success' | 'error' | '', msg: string): void {
-    statusEl.className = 'status-banner';
-    if (!msg) return;
-    statusEl.classList.add('show', type || 'info');
-    statusEl.textContent = msg;
-  }
+  const setStatus = (type: 'success' | 'error' | '', msg: string) =>
+    setStatusBanner(statusEl, type, msg);
 
   function getBaseScale(): number {
     if (!sourceImg) return 1;
@@ -306,30 +302,13 @@ export function initIdPhoto(root: HTMLElement): void {
   });
 
   // File input / drag-drop / Ctrl+V
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  bindClipboardImagePaste((files) => {
-    if (files[0]) void loadFile(files[0]);
-  });
+  bindDropzone(
+    dropzone,
+    fileInput,
+    (files) => {
+      if (files[0]) void loadFile(files[0]);
+    },
+    { pasteImages: true }
+  );
   changeBtn.addEventListener('click', () => fileInput.click());
-
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files?.[0]) void loadFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files?.[0]) {
-      void loadFile(fileInput.files[0]);
-      fileInput.value = '';
-    }
-  });
 }

@@ -1,7 +1,7 @@
-import { degrees, PDFDocument } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
+import { loadPdfJs, loadPdfLib } from './pdf-loaders';
 import {
-  bindClipboardImagePaste,
+  bindDropzone,
   bindDropzoneKeyboard,
   formatBytes,
   loadImageFromFile,
@@ -61,30 +61,9 @@ export function initPdfExtra(root: HTMLElement): void {
   let imgEntries: ImgPdfEntry[] = [];
 
   if (fromImgDrop && fromImgInput && fromImgList && fromImgSize && fromImgMargin && fromImgRun && fromImgClear && fromImgStatus) {
-    fromImgDrop.addEventListener('click', (e) => {
-      if (e.target === fromImgInput) return;
-      fromImgInput.click();
-    });
-    bindDropzoneKeyboard(fromImgDrop, fromImgInput);
-    bindClipboardImagePaste(
-      (files) => addImages(files),
-      () => Boolean(fromImgDrop.closest('.tab-panel.active'))
-    );
-    fromImgDrop.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      fromImgDrop.classList.add('drag-over');
-    });
-    fromImgDrop.addEventListener('dragleave', () => fromImgDrop.classList.remove('drag-over'));
-    fromImgDrop.addEventListener('drop', (e) => {
-      e.preventDefault();
-      fromImgDrop.classList.remove('drag-over');
-      if (e.dataTransfer?.files) addImages(Array.from(e.dataTransfer.files));
-    });
-    fromImgInput.addEventListener('change', () => {
-      if (fromImgInput.files) {
-        addImages(Array.from(fromImgInput.files));
-        fromImgInput.value = '';
-      }
+    bindDropzone(fromImgDrop, fromImgInput, (files) => addImages(files), {
+      pasteImages: true,
+      isPasteActive: () => Boolean(fromImgDrop.closest('.tab-panel.active')),
     });
 
     function addImages(files: File[]): void {
@@ -176,6 +155,7 @@ export function initPdfExtra(root: HTMLElement): void {
       if (imgEntries.length === 0) return;
       fromImgRun.disabled = true;
       try {
+        const { PDFDocument } = await loadPdfLib();
         const pdfDoc = await PDFDocument.create();
         const mode = fromImgSize.value;
         const margin = Number(fromImgMargin.value) || 0;
@@ -291,9 +271,10 @@ export function initPdfExtra(root: HTMLElement): void {
       orgResetBtn!.disabled = true;
       setStatus(orgStatus!, 'info', labels.loadingMsg);
 
-      let pdf: pdfjsLib.PDFDocumentProxy | null = null;
+      let pdf: PDFDocumentProxy | null = null;
       try {
         orgBytes = new Uint8Array(await file.arrayBuffer());
+        const pdfjsLib = await loadPdfJs();
         pdf = await pdfjsLib.getDocument({ data: orgBytes.slice() }).promise;
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -425,6 +406,7 @@ export function initPdfExtra(root: HTMLElement): void {
       if (!orgFile || !orgBytes || orgPages.length === 0) return;
       orgSaveBtn.disabled = true;
       try {
+        const { degrees, PDFDocument } = await loadPdfLib();
         const srcDoc = await PDFDocument.load(orgBytes);
         const outDoc = await PDFDocument.create();
         const indices = orgPages.map((p) => p.origIndex);

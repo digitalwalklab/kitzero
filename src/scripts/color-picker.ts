@@ -1,6 +1,5 @@
 import {
-  bindClipboardImagePaste,
-  bindDropzoneKeyboard,
+  bindDropzone,
   loadImageFromFile,
   releaseCanvas,
 } from './utils';
@@ -246,30 +245,13 @@ export function initColorPicker(root: HTMLElement): void {
     });
   });
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  bindClipboardImagePaste((files) => {
-    if (files[0]) void loadFile(files[0]);
-  });
+  bindDropzone(
+    dropzone,
+    fileInput,
+    (files) => {
+      if (files[0]) void loadFile(files[0]);
+    },
+    { pasteImages: true }
+  );
   changeBtn.addEventListener('click', () => fileInput.click());
-
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files?.[0]) void loadFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files?.[0]) {
-      void loadFile(fileInput.files[0]);
-      fileInput.value = '';
-    }
-  });
 }

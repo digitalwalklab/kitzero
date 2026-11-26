@@ -1,7 +1,6 @@
 import JSZip from 'jszip';
 import {
-  bindClipboardImagePaste,
-  bindDropzoneKeyboard,
+  bindDropzone,
   generateAndDownloadZip,
   loadImageFromFile,
   releaseCanvas,
@@ -82,30 +81,14 @@ export function initFaviconGenerator(root: HTMLElement): void {
   });
   transparentCheck.addEventListener('change', () => void renderPreviews());
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  bindClipboardImagePaste((files) => {
-    if (files[0]) void loadFile(files[0]);
-  });
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files?.[0]) void loadFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files?.[0]) {
-      void loadFile(fileInput.files[0]);
-      fileInput.value = '';
-    }
-  });
+  bindDropzone(
+    dropzone,
+    fileInput,
+    (files) => {
+      if (files[0]) void loadFile(files[0]);
+    },
+    { pasteImages: true }
+  );
 
   async function loadFile(file: File): Promise<void> {
     if (!file.type.startsWith('image/')) return;

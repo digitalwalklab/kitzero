@@ -1,9 +1,10 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
+import { loadPdfJs, loadPdfLib } from './pdf-loaders';
 import {
   bindDropzoneKeyboard,
   formatBytes,
   releaseCanvas,
+  setStatusBanner,
   stripExtension,
   triggerDownload,
 } from './utils';
@@ -12,18 +13,15 @@ interface MoreLabels {
   compressProgress: string;
   compressDone: string;
   compressCancelled: string;
+  compressAlreadyOptimal: string;
+  compressLosslessTag: string;
   watermarkDone: string;
 }
 
 export function initPdfMore(root: HTMLElement): void {
   const labels: MoreLabels = JSON.parse(root.dataset.moreLabels || '{}');
 
-  function setStatus(el: HTMLElement, type: 'success' | 'error' | 'info' | '', msg: string): void {
-    el.className = 'status-banner';
-    if (!msg) return;
-    el.classList.add('show', type || 'info');
-    el.textContent = msg;
-  }
+  const setStatus = setStatusBanner;
 
   // ==================== TAB 6: PDF COMPRESS ====================
   const cmpDrop = root.querySelector<HTMLElement>('[data-cmp-drop]');
@@ -89,14 +87,26 @@ export function initPdfMore(root: HTMLElement): void {
       cmpCancelRequested = false;
       cmpCancel.disabled = false;
 
-      let pdf: pdfjsLib.PDFDocumentProxy | null = null;
+      let pdf: PDFDocumentProxy | null = null;
       try {
         const preset = cmpLevel.value;
         const scale = preset === 'light' ? 1.5 : preset === 'strong' ? 1.0 : 1.2;
         const quality = preset === 'light' ? 0.8 : preset === 'strong' ? 0.52 : 0.68;
 
         const data = new Uint8Array(await cmpFile.arrayBuffer());
-        pdf = await pdfjsLib.getDocument({ data }).promise;
+        const [pdfjsLib, { PDFDocument }] = await Promise.all([loadPdfJs(), loadPdfLib()]);
+
+        // 1. Try lossless structural optimization first (preserves vector text & links)
+        let losslessBytes: Uint8Array | null = null;
+        try {
+          const losslessDoc = await PDFDocument.load(data.slice(), { ignoreEncryption: true });
+          losslessBytes = await losslessDoc.save({ useObjectStreams: true, addDefaultPage: false });
+        } catch {
+          losslessBytes = null;
+        }
+
+        // 2. Rasterized JPEG compression (great for heavy scanned / image-rich PDFs)
+        pdf = await pdfjsLib.getDocument({ data: data.slice() }).promise;
         const outDoc = await PDFDocument.create();
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -127,14 +137,33 @@ export function initPdfMore(root: HTMLElement): void {
           newPage.drawImage(embedded, { x: 0, y: 0, width: origVp.width, height: origVp.height });
         }
 
-        const outBytes = await outDoc.save({ useObjectStreams: true });
-        const outBlob = new Blob([new Uint8Array(outBytes)], { type: 'application/pdf' });
-        const savedPct = Math.round(((cmpFile.size - outBlob.size) / cmpFile.size) * 100);
+        const rasterBytes = await outDoc.save({ useObjectStreams: true });
+
+        // 3. Pick the strictly smallest candidate — never download a bloated file
+        let bestBytes: Uint8Array = rasterBytes;
+        let usedLossless = false;
+        if (losslessBytes && losslessBytes.length < bestBytes.length) {
+          bestBytes = losslessBytes;
+          usedLossless = true;
+        }
+
+        if (bestBytes.length >= cmpFile.size) {
+          setStatus(
+            cmpStatus,
+            'warn',
+            `${labels.compressAlreadyOptimal} (${formatBytes(cmpFile.size)})`
+          );
+          return;
+        }
+
+        const outBlob = new Blob([new Uint8Array(bestBytes)], { type: 'application/pdf' });
+        const savedPct = Math.max(1, Math.round(((cmpFile.size - outBlob.size) / cmpFile.size) * 100));
         triggerDownload(outBlob, `${stripExtension(cmpFile.name)}_compressed.pdf`);
+        const modeNote = usedLossless ? `, ${labels.compressLosslessTag}` : '';
         setStatus(
           cmpStatus,
           'success',
-          `${labels.compressDone} (${formatBytes(cmpFile.size)} → ${formatBytes(outBlob.size)}, ${savedPct >= 0 ? `-${savedPct}%` : `+${Math.abs(savedPct)}%`})`
+          `${labels.compressDone} (${formatBytes(cmpFile.size)} → ${formatBytes(outBlob.size)}, -${savedPct}%${modeNote})`
         );
       } catch (err) {
         setStatus(cmpStatus, 'error', String(err));
@@ -209,6 +238,7 @@ export function initPdfMore(root: HTMLElement): void {
       wmRun.disabled = true;
       try {
         const bytes = new Uint8Array(await wmFile.arrayBuffer());
+        const { PDFDocument, rgb, StandardFonts } = await loadPdfLib();
         const pdfDoc = await PDFDocument.load(bytes);
         const pages = pdfDoc.getPages();
         const text = wmText.value.trim();

@@ -1,4 +1,4 @@
-import { bindDropzoneKeyboard, extensionFromMime, releaseCanvas, stripExtension, triggerDownload } from './utils';
+import { bindDropzone, extensionFromMime, releaseCanvas, stripExtension, triggerDownload } from './utils';
 
 const SAMPLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
   <rect width="120" height="120" rx="28" fill="#1e3a5f"/>
@@ -21,26 +21,8 @@ export function initSvgConverter(root: HTMLElement): void {
   let previewUrl: string | null = null;
   codeInput.value = SAMPLE_SVG;
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files?.[0]) void loadSvgFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files?.[0]) {
-      void loadSvgFile(fileInput.files[0]);
-      fileInput.value = '';
-    }
+  bindDropzone(dropzone, fileInput, (files) => {
+    if (files[0]) void loadSvgFile(files[0]);
   });
 
   async function loadSvgFile(file: File): Promise<void> {

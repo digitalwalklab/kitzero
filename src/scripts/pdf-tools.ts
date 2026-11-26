@@ -1,6 +1,5 @@
-import JSZip from 'jszip';
-import { PDFDocument } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
+import { loadJSZip, loadPdfJs, loadPdfLib } from './pdf-loaders';
 import {
   bindDropzoneKeyboard,
   formatBytes,
@@ -13,7 +12,6 @@ import {
   WARN_PDF_IMAGE_PAGES,
 } from './utils';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 interface MergeItem {
   id: string;
@@ -141,6 +139,7 @@ export function initPdfTools(root: HTMLElement): void {
     for (const file of pdfs) {
       try {
         const bytes = new Uint8Array(await file.arrayBuffer());
+        const { PDFDocument } = await loadPdfLib();
         const doc = await PDFDocument.load(bytes);
         mergeItems.push({
           id: crypto.randomUUID(),
@@ -229,6 +228,7 @@ export function initPdfTools(root: HTMLElement): void {
     }
     mergeRunBtn.disabled = true;
     try {
+      const { PDFDocument } = await loadPdfLib();
       const merged = await PDFDocument.create();
       for (const item of mergeItems) {
         const src = await PDFDocument.load(item.bytes);
@@ -292,6 +292,7 @@ export function initPdfTools(root: HTMLElement): void {
     setStatus(splitStatus, '', '');
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
+      const { PDFDocument } = await loadPdfLib();
       const doc = await PDFDocument.load(bytes);
       splitFile = file;
       splitBytes = bytes;
@@ -323,10 +324,12 @@ export function initPdfTools(root: HTMLElement): void {
     if (!splitFile || !splitBytes) return;
     splitRunBtn.disabled = true;
     try {
+      const { PDFDocument } = await loadPdfLib();
       const srcDoc = await PDFDocument.load(splitBytes);
       const baseName = stripExtension(splitFile.name);
 
       if (splitModeSelect.value === 'every') {
+        const JSZip = await loadJSZip();
         const zip = new JSZip();
         for (let i = 0; i < splitTotalPages; i++) {
           const single = await PDFDocument.create();
@@ -421,6 +424,7 @@ export function initPdfTools(root: HTMLElement): void {
 
     try {
       const data = new Uint8Array(await file.arrayBuffer());
+      const pdfjsLib = await loadPdfJs();
       const doc = await pdfjsLib.getDocument({ data }).promise;
       imgPdfPageCount = doc.numPages;
       await doc.destroy();
@@ -456,7 +460,7 @@ export function initPdfTools(root: HTMLElement): void {
     imgCancelRequested = false;
     imgCancelBtn.disabled = false;
 
-    let pdf: pdfjsLib.PDFDocumentProxy | null = null;
+    let pdf: PDFDocumentProxy | null = null;
     try {
       const mime = imgFormatSelect.value;
       const ext = mime === 'image/png' ? 'png' : 'jpg';
@@ -464,6 +468,7 @@ export function initPdfTools(root: HTMLElement): void {
       const baseName = stripExtension(imgPdfFile.name);
       const data = new Uint8Array(await imgPdfFile.arrayBuffer());
 
+      const pdfjsLib = await loadPdfJs();
       const loadingTask = pdfjsLib.getDocument({ data });
       pdf = await loadingTask.promise;
 
@@ -552,6 +557,7 @@ export function initPdfTools(root: HTMLElement): void {
 
   imgZipBtn.addEventListener('click', async () => {
     if (renderedPages.length === 0 || !imgPdfFile) return;
+    const JSZip = await loadJSZip();
     const zip = new JSZip();
     for (const p of renderedPages) {
       zip.file(p.filename, p.blob);

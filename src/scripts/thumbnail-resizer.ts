@@ -1,7 +1,6 @@
 import JSZip from 'jszip';
 import {
-  bindClipboardImagePaste,
-  bindDropzoneKeyboard,
+  bindDropzone,
   extensionFromMime,
   formatBytes,
   generateAndDownloadZip,
@@ -82,33 +81,14 @@ export function initThumbnailResizer(root: HTMLElement): void {
     });
   });
 
-  dropzone.addEventListener('click', (e) => {
-    if (e.target === fileInput) return;
-    fileInput.click();
-  });
-  bindDropzoneKeyboard(dropzone, fileInput);
-  bindClipboardImagePaste((files) => {
-    void addFiles(files);
-  });
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
-  });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer?.files) {
-      void addFiles(Array.from(e.dataTransfer.files));
-    }
-  });
-
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files) {
-      void addFiles(Array.from(fileInput.files));
-      fileInput.value = '';
-    }
-  });
+  bindDropzone(
+    dropzone,
+    fileInput,
+    (files) => {
+      void addFiles(files);
+    },
+    { pasteImages: true }
+  );
 
   async function addFiles(files: File[]): Promise<void> {
     const valid = files.filter((f) => f.type.startsWith('image/'));

@@ -327,3 +327,59 @@ export function bindClipboardImagePaste(
     }
   });
 }
+
+export type StatusBannerType = 'success' | 'error' | 'info' | 'warn' | '';
+
+export function setStatusBanner(
+  el: HTMLElement | null | undefined,
+  type: StatusBannerType,
+  message: string
+): void {
+  if (!el) return;
+  el.className = 'status-banner';
+  if (!message) {
+    el.textContent = '';
+    return;
+  }
+  el.classList.add('show', type || 'info');
+  el.textContent = message;
+}
+
+export interface BindDropzoneOptions {
+  pasteImages?: boolean;
+  isPasteActive?: () => boolean;
+}
+
+export function bindDropzone(
+  dropzone: HTMLElement,
+  fileInput: HTMLInputElement,
+  onFiles: (files: File[]) => void,
+  options: BindDropzoneOptions = {}
+): void {
+  dropzone.addEventListener('click', (e) => {
+    if (e.target === fileInput) return;
+    fileInput.click();
+  });
+  bindDropzoneKeyboard(dropzone, fileInput);
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('drag-over');
+  });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    if (e.dataTransfer?.files?.length) {
+      onFiles(Array.from(e.dataTransfer.files));
+    }
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files?.length) {
+      onFiles(Array.from(fileInput.files));
+      fileInput.value = '';
+    }
+  });
+  if (options.pasteImages) {
+    bindClipboardImagePaste(onFiles, options.isPasteActive);
+  }
+}
