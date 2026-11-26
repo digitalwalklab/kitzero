@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolIcon from '../components/ToolIcon.astro';
+import { translations } from '../i18n/translations';
+
+const featuredIds = [
+  'image-optimizer',
+  'image-blur',
+  'heic-converter',
+  'pdf-merge',
+  'pdf-compress',
+  'qr-generator',
+] as const;
+
+const featuredTools = featuredIds
+  .map((id) => translations.ko.tools.find((tool) => tool.id === id))
+  .filter((tool): tool is NonNullable<typeof tool> => Boolean(tool));
+---
+
+<BaseLayout
+  locale="ko"
+  title="페이지를 찾을 수 없습니다 (404) | KitZero(킷제로)"
+  description="요청하신 페이지를 찾을 수 없습니다. KitZero(킷제로)의 서버 업로드 없는 무료 로컬 이미지·PDF 도구를 이용해 보세요."
+  activeNav="home"
+>
+  <section class="not-found-card card">
+    <span class="not-found-code">404</span>
+    <h1>페이지를 찾을 수 없습니다</h1>
+    <p class="not-found-desc">
+      주소가 변경되었거나 삭제된 페이지입니다.<br />
+      <span class="not-found-en">The page you requested could not be found.</span>
+    </p>
+    <div class="not-found-actions">
+      <a href="/" class="btn btn-primary">홈으로 돌아가기</a>
+      <a href="/en/" class="btn btn-secondary">English Home</a>
+    </div>
+  </section>
+
+  <section class="not-found-popular">
+    <h2>자주 찾는 로컬 도구</h2>
+    <div class="not-found-grid">
+      {featuredTools.map((tool) => (
+        <a href={tool.slug} class="not-found-tool card">
+          <span class={`tool-subtab-icon accent-${tool.accent}`}>
+            <ToolIcon id={tool.id} size={18} />
+          </span>
+          <div>
+            <strong>{tool.title}</strong>
+            <span>{tool.shortDesc}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found-card {
+    text-align: center;
+    padding: 48px 24px;
+    margin-bottom: 28px;
+  }
+  .not-found-code {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    background: var(--primary-soft);
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .not-found-card h1 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin: 0 0 12px;
+  }
+  .not-found-desc {
+    color: var(--text-muted);
+    margin: 0 0 24px;
+    line-height: 1.65;
+  }
+  .not-found-en {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+  .not-found-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .not-found-popular h2 {
+    font-size: 1.1rem;
+    margin: 0 0 14px;
+  }
+  .not-found-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  .not-found-tool {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .not-found-tool:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+  .not-found-tool strong {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+  .not-found-tool span {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+</style>

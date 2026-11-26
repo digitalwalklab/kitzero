@@ -1,0 +1,165 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtra3Copy } from '../i18n/extraTools3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtra3Copy(locale).imageMerge;
+const clientLabels = {
+  needTwo: copy.needTwo,
+  doneMsg: copy.doneMsg,
+  emptyPreview: copy.emptyPreview,
+};
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="image" activeId="image-merge" />
+
+<div id="image-merge-root" data-labels={JSON.stringify(clientLabels)}>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="field">
+        <label for="im-layout">{copy.layoutLabel}</label>
+        <select id="im-layout" data-im-layout>
+          <option value="vertical" selected>{copy.layoutVertical}</option>
+          <option value="horizontal">{copy.layoutHorizontal}</option>
+          <option value="grid2">{copy.layoutGrid2}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="im-align">{copy.alignSizeLabel}</label>
+        <select id="im-align" data-im-align>
+          <option value="fit" selected>{copy.alignFit}</option>
+          <option value="original">{copy.alignOriginal}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="range-row">
+          <label for="im-gap">{copy.gapLabel}</label>
+          <span class="range-value" data-im-gap-val>12px</span>
+        </div>
+        <input id="im-gap" type="range" min="0" max="80" step="2" value="12" data-im-gap />
+      </div>
+
+      <div class="field">
+        <label for="im-bg">{copy.bgColorLabel}</label>
+        <input id="im-bg" type="color" value="#ffffff" data-im-bg />
+      </div>
+
+      <div class="field">
+        <label for="im-format">{copy.formatLabel}</label>
+        <select id="im-format" data-im-format>
+          <option value="image/webp" selected>WebP</option>
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPG</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="range-row">
+          <label for="im-quality">{copy.qualityLabel}</label>
+          <span class="range-value" data-im-quality-val>90%</span>
+        </div>
+        <input id="im-quality" type="range" min="50" max="100" value="90" data-im-quality />
+      </div>
+
+      <div style="display: grid; gap: 10px; margin-top: 16px;">
+        <button type="button" class="btn btn-primary" data-im-download disabled>
+          {copy.downloadBtn}
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-im-clear disabled>
+          {copy.clearBtn}
+        </button>
+      </div>
+      <div class="status-banner" data-im-status></div>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-im-drop role="button" tabindex="0">
+        <input type="file" accept="image/*" multiple hidden data-im-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFiles}</span>
+        <div class="paste-hint">
+          <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+        </div>
+      </div>
+
+      <div class="file-list" data-im-list></div>
+
+      <div class="card im-preview-card">
+        <div class="im-preview-head">
+          <strong>{copy.previewTitle}</strong>
+          <span class="im-preview-meta" data-im-meta></span>
+        </div>
+        <p class="im-empty" data-im-empty>{copy.emptyPreview}</p>
+        <canvas class="im-canvas" data-im-canvas hidden></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ToolSeoGuide locale={locale} toolKey="image-merge" />
+
+<script>
+  import { initImageMerge } from '../scripts/image-merge';
+  const root = document.getElementById('image-merge-root');
+  if (root) initImageMerge(root);
+</script>
+
+<style>
+  .im-preview-card {
+    margin-top: 16px;
+    padding: 18px;
+  }
+  .im-preview-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.92rem;
+  }
+  .im-preview-meta {
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .im-empty {
+    margin: 24px 0;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+  }
+  .im-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 520px;
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .im-canvas[hidden],
+  .im-empty[hidden] {
+    display: none;
+  }
+</style>

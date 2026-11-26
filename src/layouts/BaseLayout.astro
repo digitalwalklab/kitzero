@@ -15,19 +15,33 @@ interface Props {
     | 'image-blur'
     | 'heic-converter'
     | 'watermark'
+    | 'image-merge'
+    | 'id-photo'
     | 'pdf-tools'
+    | 'pdf-merge'
+    | 'pdf-split'
+    | 'pdf-to-image'
+    | 'image-to-pdf'
+    | 'pdf-organize'
+    | 'pdf-compress'
+    | 'pdf-watermark'
     | 'pdf-sign'
     | 'qr-generator'
     | 'favicon-generator'
     | 'svg-converter'
-    | 'privacy';
+    | 'word-counter'
+    | 'color-picker'
+    | 'privacy'
+    | 'terms'
+    | 'about';
 }
 
 const { locale, title, description, activeNav = 'home' } = Astro.props;
 const t = translations[locale];
 const currentPath = Astro.url.pathname;
-const koPath = getAlternatePath(currentPath, 'ko');
-const enPath = getAlternatePath(currentPath, 'en');
+const isNotFound = currentPath.replace(/\/$/, '') === '/404' || currentPath === '/404.html';
+const koPath = isNotFound ? '/' : getAlternatePath(currentPath, 'ko');
+const enPath = isNotFound ? '/en/' : getAlternatePath(currentPath, 'en');
 const siteOrigin = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kitzero.jokerx04.com';
 const canonicalUrl = `${siteOrigin}${currentPath}`;
 const koUrl = `${siteOrigin}${koPath}`;
@@ -45,10 +59,25 @@ const isImageActive =
   activeNav === 'image-crop' ||
   activeNav === 'image-blur' ||
   activeNav === 'heic-converter' ||
-  activeNav === 'watermark';
-const isPdfActive = activeNav === 'pdf-tools' || activeNav === 'pdf-sign';
+  activeNav === 'watermark' ||
+  activeNav === 'image-merge' ||
+  activeNav === 'id-photo';
+const isPdfActive =
+  activeNav === 'pdf-tools' ||
+  activeNav === 'pdf-merge' ||
+  activeNav === 'pdf-split' ||
+  activeNav === 'pdf-to-image' ||
+  activeNav === 'image-to-pdf' ||
+  activeNav === 'pdf-organize' ||
+  activeNav === 'pdf-compress' ||
+  activeNav === 'pdf-watermark' ||
+  activeNav === 'pdf-sign';
 const isUtilityActive =
-  activeNav === 'qr-generator' || activeNav === 'favicon-generator' || activeNav === 'svg-converter';
+  activeNav === 'qr-generator' ||
+  activeNav === 'favicon-generator' ||
+  activeNav === 'svg-converter' ||
+  activeNav === 'word-counter' ||
+  activeNav === 'color-picker';
 
 const navLabelMap: Record<NonNullable<Props['activeNav']>, string> = {
   home: t.nav.home,
@@ -58,12 +87,25 @@ const navLabelMap: Record<NonNullable<Props['activeNav']>, string> = {
   'image-blur': locale === 'ko' ? '모자이크 · 블러 가리기' : 'Mosaic & Blur Redactor',
   'heic-converter': locale === 'ko' ? '아이폰 HEIC 변환기' : 'HEIC Converter',
   watermark: locale === 'ko' ? '이미지 워터마크' : 'Batch Watermark',
+  'image-merge': locale === 'ko' ? '이미지 이어붙이기 · 사진 합치기' : 'Combine & Stitch Images',
+  'id-photo': locale === 'ko' ? '여권 · 증명사진 규격 자르기' : 'Passport & ID Photo Cropper',
   'pdf-tools': t.nav.pdfTools,
+  'pdf-merge': locale === 'ko' ? 'PDF 합치기' : 'Merge PDFs',
+  'pdf-split': locale === 'ko' ? 'PDF 분할 · 페이지 추출' : 'Split & Extract PDF',
+  'pdf-to-image': locale === 'ko' ? 'PDF → 이미지 변환' : 'PDF to PNG / JPG',
+  'image-to-pdf': locale === 'ko' ? '이미지 → PDF 변환' : 'Images to PDF',
+  'pdf-organize': locale === 'ko' ? 'PDF 회전 · 삭제 · 순서 변경' : 'Rotate, Delete & Reorder PDF',
+  'pdf-compress': locale === 'ko' ? 'PDF 용량 줄이기' : 'Compress PDF Size',
+  'pdf-watermark': locale === 'ko' ? 'PDF 워터마크 · 페이지 번호' : 'PDF Watermark & Page Numbers',
   'pdf-sign': locale === 'ko' ? 'PDF 전자서명 · 도장 찍기' : 'Sign & Stamp PDF',
   'qr-generator': locale === 'ko' ? 'QR 코드 생성기' : 'QR Code Generator',
   'favicon-generator': locale === 'ko' ? '파비콘 생성기' : 'Favicon Generator',
   'svg-converter': locale === 'ko' ? 'SVG → PNG · WebP 변환기' : 'SVG Converter',
+  'word-counter': locale === 'ko' ? '글자 수 세기 · 바이트 계산기' : 'Word & Character Counter',
+  'color-picker': locale === 'ko' ? '이미지 색상 추출기 · 스포이드' : 'Image Color Picker',
   privacy: t.nav.privacy,
+  terms: locale === 'ko' ? '이용약관' : 'Terms of Service',
+  about: locale === 'ko' ? '소개 · 문의' : 'About & Contact',
 };
 
 const categoryMeta = isImageActive
@@ -162,7 +204,7 @@ const jsonLd = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="robots" content={isNotFound ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
     <meta name="theme-color" content="#1e3a5f" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -177,10 +219,14 @@ const jsonLd = {
     />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="alternate" hreflang="ko" href={koUrl} />
-    <link rel="alternate" hreflang="en" href={enUrl} />
-    <link rel="alternate" hreflang="x-default" href={enUrl} />
+    {!isNotFound && (
+      <>
+        <link rel="canonical" href={canonicalUrl} />
+        <link rel="alternate" hreflang="ko" href={koUrl} />
+        <link rel="alternate" hreflang="en" href={enUrl} />
+        <link rel="alternate" hreflang="x-default" href={enUrl} />
+      </>
+    )}
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -217,7 +263,7 @@ const jsonLd = {
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
-  <body>
+  <body data-active-tool={activeNav !== 'home' && activeNav !== 'privacy' && activeNav !== 'terms' && activeNav !== 'about' && activeNav !== 'pdf-tools' ? activeNav : undefined}>
     <header class="site-header">
       <div class="container header-inner">
         <a href={prefix ? `${prefix}/` : '/'} class="brand">
@@ -450,6 +496,8 @@ const jsonLd = {
           <div style="margin-top: 4px; color: var(--ink-muted); font-size: 0.8rem;">{t.footer.copyright}</div>
         </div>
         <div class="footer-links">
+          <a href={`${prefix}/about/`}>{locale === 'ko' ? '소개 · 문의' : 'About'}</a>
+          <a href={`${prefix}/terms/`}>{locale === 'ko' ? '이용약관' : 'Terms'}</a>
           <a href={`${prefix}/privacy/`}>{t.footer.privacyLink}</a>
         </div>
       </div>
@@ -520,6 +568,17 @@ const jsonLd = {
           mobileDrawer.querySelectorAll('a').forEach((link) => {
             link.addEventListener('click', () => setMobileDrawer(false));
           });
+        }
+
+        // Track recently used tool in localStorage
+        const currentToolId = document.body.getAttribute('data-active-tool');
+        if (currentToolId) {
+          try {
+            const raw = localStorage.getItem('kitzero-recent-tools');
+            const list = Array.isArray(JSON.parse(raw || '[]')) ? JSON.parse(raw || '[]') : [];
+            const next = [currentToolId, ...list.filter((id) => id !== currentToolId)].slice(0, 4);
+            localStorage.setItem('kitzero-recent-tools', JSON.stringify(next));
+          } catch {}
         }
 
         // PWA Service Worker registration

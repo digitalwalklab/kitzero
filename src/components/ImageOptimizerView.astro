@@ -1,5 +1,6 @@
 ---
 import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
 import { translations, type Locale } from '../i18n/translations';
 import { getExtraCopy } from '../i18n/extraTools';
 
@@ -122,6 +123,9 @@ const clientLabels = {
         <h2>{copy.dropTitle}</h2>
         <p>{copy.dropHint}</p>
         <span class="btn btn-primary btn-sm">{copy.selectFiles}</span>
+        <div class="paste-hint">
+          <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+        </div>
       </div>
 
       <div class="stats-bar">
@@ -142,13 +146,6 @@ const clientLabels = {
       <div class="file-list" data-file-list></div>
     </div>
   </div>
-
-  <section class="card info-box">
-    <h2>{copy.howItWorksTitle}</h2>
-    <ul>
-      {copy.howItWorksSteps.map((step) => <li>{step}</li>)}
-    </ul>
-  </section>
 
   <!-- Before / After Compare Modal -->
   <div class="modal-backdrop" data-compare-modal hidden role="dialog" aria-modal="true" aria-label={compareCopy.title}>
@@ -174,6 +171,8 @@ const clientLabels = {
     </div>
   </div>
 </div>
+
+<ToolSeoGuide locale={locale} toolKey="image-optimizer" />
 
 <script>
   import { initImageOptimizer } from '../scripts/image-optimizer';

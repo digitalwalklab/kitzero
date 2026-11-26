@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TermsView from '../../components/TermsView.astro';
+import { legalPages } from '../../i18n/legalPages';
+
+const page = legalPages.en.terms;
+---
+
+<BaseLayout
+  locale="en"
+  title={page.metaTitle}
+  description={page.metaDesc}
+  activeNav="terms"
+>
+  <TermsView locale="en" />
+</BaseLayout>

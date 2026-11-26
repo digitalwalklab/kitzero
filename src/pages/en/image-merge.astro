@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ImageMergeView from '../../components/ImageMergeView.astro';
+import { getExtra3Copy } from '../../i18n/extraTools3';
+
+const copy = getExtra3Copy('en').imageMerge;
+---
+
+<BaseLayout
+  locale="en"
+  title={copy.metaTitle}
+  description={copy.metaDesc}
+  activeNav="image-merge"
+>
+  <ImageMergeView locale="en" />
+</BaseLayout>

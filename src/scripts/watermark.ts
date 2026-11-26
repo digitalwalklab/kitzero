@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import {
+  bindClipboardImagePaste,
   bindDropzoneKeyboard,
   extensionFromMime,
   formatBytes,
@@ -80,6 +81,9 @@ export function initWatermark(root: HTMLElement): void {
     fileInput.click();
   });
   bindDropzoneKeyboard(dropzone, fileInput);
+  bindClipboardImagePaste((files) => {
+    addFiles(files);
+  });
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('drag-over');

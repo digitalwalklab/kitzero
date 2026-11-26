@@ -1,0 +1,239 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtra3Copy } from '../i18n/extraTools3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtra3Copy(locale).colorPicker;
+const clientLabels = {
+  copiedMsg: copy.copiedMsg,
+};
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="utility" activeId="color-picker" />
+
+<div id="color-picker-root" data-labels={JSON.stringify(clientLabels)}>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <h2 class="cp-panel-title">{copy.selectedTitle}</h2>
+      <div class="cp-swatch" data-cp-swatch></div>
+
+      <div class="cp-code-list">
+        <div class="cp-code-row">
+          <span class="cp-code-label">HEX</span>
+          <code data-cp-hex>-</code>
+          <button type="button" class="btn btn-secondary btn-sm" data-cp-copy="hex">{copy.copyBtn}</button>
+        </div>
+        <div class="cp-code-row">
+          <span class="cp-code-label">RGB</span>
+          <code data-cp-rgb>-</code>
+          <button type="button" class="btn btn-secondary btn-sm" data-cp-copy="rgb">{copy.copyBtn}</button>
+        </div>
+        <div class="cp-code-row">
+          <span class="cp-code-label">HSL</span>
+          <code data-cp-hsl>-</code>
+          <button type="button" class="btn btn-secondary btn-sm" data-cp-copy="hsl">{copy.copyBtn}</button>
+        </div>
+      </div>
+
+      <div class="cp-history-wrap">
+        <div class="cp-sub-title">{copy.historyTitle}</div>
+        <div class="cp-history" data-cp-history></div>
+      </div>
+
+      <div class="status-banner" data-cp-status></div>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-cp-drop role="button" tabindex="0">
+        <input type="file" accept="image/*" hidden data-cp-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFile}</span>
+        <div class="paste-hint">
+          <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+        </div>
+      </div>
+
+      <div class="card cp-stage" data-cp-stage hidden>
+        <div class="cp-stage-bar">
+          <span class="cp-hint">{copy.clickHint}</span>
+          <button type="button" class="btn btn-secondary btn-sm" data-cp-change>{copy.changeBtn}</button>
+        </div>
+        <div class="cp-canvas-wrap">
+          <canvas class="cp-canvas" data-cp-canvas></canvas>
+        </div>
+
+        <div class="cp-palette-wrap">
+          <div class="cp-sub-title">{copy.paletteTitle}</div>
+          <div class="cp-palette" data-cp-palette></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ToolSeoGuide locale={locale} toolKey="color-picker" />
+
+<script>
+  import { initColorPicker } from '../scripts/color-picker';
+  const root = document.getElementById('color-picker-root');
+  if (root) initColorPicker(root);
+</script>
+
+<style>
+  .cp-panel-title {
+    font-size: 0.96rem;
+    margin: 0 0 12px;
+  }
+  .cp-swatch {
+    width: 100%;
+    height: 76px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface-subtle);
+    margin-bottom: 14px;
+  }
+  .cp-code-list {
+    display: grid;
+    gap: 8px;
+  }
+  .cp-code-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .cp-code-label {
+    font-weight: 700;
+    color: var(--ink-muted);
+    font-size: 0.74rem;
+  }
+  .cp-code-row code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cp-sub-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+    margin: 16px 0 8px;
+  }
+  .cp-history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cp-history :global(.cp-chip) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cp-history :global(.cp-chip-dot) {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+  }
+  .cp-stage {
+    padding: 18px;
+  }
+  .cp-stage[hidden] {
+    display: none;
+  }
+  .cp-stage-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .cp-hint {
+    font-size: 0.84rem;
+    color: var(--ink-muted);
+  }
+  .cp-canvas-wrap {
+    text-align: center;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px;
+  }
+  .cp-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 460px;
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    cursor: crosshair;
+    border-radius: 4px;
+  }
+  .cp-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 8px;
+  }
+  .cp-palette :global(.cp-palette-item) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .cp-palette :global(.cp-palette-item:hover) {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+  .cp-palette :global(.cp-palette-swatch) {
+    width: 100%;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .cp-palette :global(.cp-palette-hex) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+</style>

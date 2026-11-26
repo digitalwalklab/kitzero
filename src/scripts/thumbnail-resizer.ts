@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import {
+  bindClipboardImagePaste,
   bindDropzoneKeyboard,
   extensionFromMime,
   formatBytes,
@@ -86,6 +87,9 @@ export function initThumbnailResizer(root: HTMLElement): void {
     fileInput.click();
   });
   bindDropzoneKeyboard(dropzone, fileInput);
+  bindClipboardImagePaste((files) => {
+    void addFiles(files);
+  });
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('drag-over');

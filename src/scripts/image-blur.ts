@@ -1,4 +1,5 @@
 import {
+  bindClipboardImagePaste,
   bindDropzoneKeyboard,
   extensionFromMime,
   loadImageFromFile,
@@ -49,6 +50,9 @@ export function initImageBlur(root: HTMLElement): void {
     fileInput.click();
   });
   bindDropzoneKeyboard(dropzone, fileInput);
+  bindClipboardImagePaste((files) => {
+    if (files[0]) void loadFile(files[0]);
+  });
   changeBtn.addEventListener('click', () => fileInput.click());
 
   dropzone.addEventListener('dragover', (e) => {

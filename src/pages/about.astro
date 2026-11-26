@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AboutView from '../components/AboutView.astro';
+import { legalPages } from '../i18n/legalPages';
+
+const page = legalPages.ko.about;
+---
+
+<BaseLayout
+  locale="ko"
+  title={page.metaTitle}
+  description={page.metaDesc}
+  activeNav="about"
+>
+  <AboutView locale="ko" />
+</BaseLayout>

@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ColorPickerView from '../../components/ColorPickerView.astro';
+import { getExtra3Copy } from '../../i18n/extraTools3';
+
+const copy = getExtra3Copy('en').colorPicker;
+---
+
+<BaseLayout
+  locale="en"
+  title={copy.metaTitle}
+  description={copy.metaDesc}
+  activeNav="color-picker"
+>
+  <ColorPickerView locale="en" />
+</BaseLayout>

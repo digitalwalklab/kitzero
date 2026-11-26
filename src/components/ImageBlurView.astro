@@ -88,6 +88,9 @@ const copy = getExtraCopy(locale).imageBlur;
         <h2>{copy.dropTitle}</h2>
         <p>{copy.dropHint}</p>
         <span class="btn btn-primary btn-sm">{copy.selectFile}</span>
+        <div class="paste-hint">
+          <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+        </div>
       </div>
 
       <div class="canvas-stage" data-blur-stage hidden>

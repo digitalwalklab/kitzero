@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WordCounterView from '../../components/WordCounterView.astro';
+import { getExtra3Copy } from '../../i18n/extraTools3';
+
+const copy = getExtra3Copy('en').wordCounter;
+---
+
+<BaseLayout
+  locale="en"
+  title={copy.metaTitle}
+  description={copy.metaDesc}
+  activeNav="word-counter"
+>
+  <WordCounterView locale="en" />
+</BaseLayout>

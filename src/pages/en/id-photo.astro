@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import IdPhotoView from '../../components/IdPhotoView.astro';
+import { getIdPhotoCopy } from '../../i18n/idPhoto';
+
+const copy = getIdPhotoCopy('en');
+---
+
+<BaseLayout
+  locale="en"
+  title={copy.metaTitle}
+  description={copy.metaDesc}
+  activeNav="id-photo"
+>
+  <IdPhotoView locale="en" />
+</BaseLayout>

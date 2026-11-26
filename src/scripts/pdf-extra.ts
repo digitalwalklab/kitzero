@@ -1,6 +1,7 @@
 import { degrees, PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import {
+  bindClipboardImagePaste,
   bindDropzoneKeyboard,
   formatBytes,
   loadImageFromFile,
@@ -65,6 +66,10 @@ export function initPdfExtra(root: HTMLElement): void {
       fromImgInput.click();
     });
     bindDropzoneKeyboard(fromImgDrop, fromImgInput);
+    bindClipboardImagePaste(
+      (files) => addImages(files),
+      () => Boolean(fromImgDrop.closest('.tab-panel.active'))
+    );
     fromImgDrop.addEventListener('dragover', (e) => {
       e.preventDefault();
       fromImgDrop.classList.add('drag-over');

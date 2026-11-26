@@ -1,0 +1,206 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getExtra3Copy } from '../i18n/extraTools3';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getExtra3Copy(locale).wordCounter;
+const clientLabels = {
+  copiedMsg: copy.copiedMsg,
+  trimmedMsg: copy.trimmedMsg,
+  noKeywords: copy.noKeywords,
+  unitSec: copy.unitSec,
+  unitMin: copy.unitMin,
+};
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="utility" activeId="word-counter" />
+
+<div id="word-counter-root" data-labels={JSON.stringify(clientLabels)}>
+  <div class="wc-stats-grid">
+    <div class="card wc-stat wc-stat-primary">
+      <span class="wc-stat-label">{copy.charsWithSpace}</span>
+      <strong class="wc-stat-val"><span data-wc-with-space>0</span><small>{copy.unitChars}</small></strong>
+    </div>
+    <div class="card wc-stat wc-stat-primary">
+      <span class="wc-stat-label">{copy.charsNoSpace}</span>
+      <strong class="wc-stat-val"><span data-wc-no-space>0</span><small>{copy.unitChars}</small></strong>
+    </div>
+    <div class="card wc-stat">
+      <span class="wc-stat-label">{copy.bytesEucKr}</span>
+      <strong class="wc-stat-val"><span data-wc-bytes-euc>0</span><small>{copy.unitBytes}</small></strong>
+    </div>
+    <div class="card wc-stat">
+      <span class="wc-stat-label">{copy.bytesUtf8}</span>
+      <strong class="wc-stat-val"><span data-wc-bytes-utf8>0</span><small>{copy.unitBytes}</small></strong>
+    </div>
+    <div class="card wc-stat">
+      <span class="wc-stat-label">{copy.words}</span>
+      <strong class="wc-stat-val" data-wc-words>0</strong>
+    </div>
+    <div class="card wc-stat">
+      <span class="wc-stat-label">{copy.sentences}</span>
+      <strong class="wc-stat-val" data-wc-sentences>0</strong>
+    </div>
+    <div class="card wc-stat">
+      <span class="wc-stat-label">{copy.lines}</span>
+      <strong class="wc-stat-val" data-wc-lines>0</strong>
+    </div>
+    <div class="card wc-stat">
+      <span class="wc-stat-label">{copy.readingTime}</span>
+      <strong class="wc-stat-val" data-wc-read-time>0{copy.unitSec}</strong>
+    </div>
+  </div>
+
+  <div class="card wc-editor-card">
+    <textarea
+      class="wc-textarea"
+      data-wc-input
+      rows="11"
+      placeholder={copy.placeholder}
+      aria-label={copy.title}
+    ></textarea>
+
+    <div class="wc-toolbar">
+      <div class="wc-actions">
+        <button type="button" class="btn btn-primary btn-sm" data-wc-copy>{copy.copyBtn}</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-wc-trim>{copy.trimBtn}</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-wc-clear>{copy.clearBtn}</button>
+      </div>
+      <div class="wc-keywords-wrap">
+        <span class="wc-keywords-title">{copy.topKeywords}:</span>
+        <div class="wc-keywords" data-wc-keywords></div>
+      </div>
+    </div>
+    <div class="status-banner" data-wc-status></div>
+  </div>
+</div>
+
+<ToolSeoGuide locale={locale} toolKey="word-counter" />
+
+<script>
+  import { initWordCounter } from '../scripts/word-counter';
+  const root = document.getElementById('word-counter-root');
+  if (root) initWordCounter(root);
+</script>
+
+<style>
+  .wc-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .wc-stat {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wc-stat-primary {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .wc-stat-label {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .wc-stat-val {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .wc-stat-val small {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 2px;
+    color: var(--ink-muted);
+  }
+  .wc-editor-card {
+    padding: 18px;
+  }
+  .wc-textarea {
+    width: 100%;
+    min-height: 260px;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface-subtle);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    resize: vertical;
+  }
+  .wc-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--surface);
+  }
+  .wc-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .wc-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .wc-keywords-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+  }
+  .wc-keywords-title {
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .wc-keywords {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .wc-keywords :global(.wc-keyword-chip) {
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .wc-keywords :global(.wc-keyword-empty) {
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+  }
+  @media (max-width: 760px) {
+    .wc-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

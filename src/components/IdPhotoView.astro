@@ -1,0 +1,183 @@
+---
+import CategorySubNav from './CategorySubNav.astro';
+import ToolSeoGuide from './ToolSeoGuide.astro';
+import { translations, type Locale } from '../i18n/translations';
+import { getIdPhotoCopy } from '../i18n/idPhoto';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = getIdPhotoCopy(locale);
+const clientLabels = {
+  doneSingle: copy.doneSingle,
+  doneSheet: copy.doneSheet,
+};
+const clientPresets = copy.presets.map((p) => ({
+  id: p.id,
+  width: p.width,
+  height: p.height,
+}));
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+</section>
+
+<CategorySubNav locale={locale} category="image" activeId="id-photo" />
+
+<div
+  id="id-photo-root"
+  data-labels={JSON.stringify(clientLabels)}
+  data-presets={JSON.stringify(clientPresets)}
+>
+  <div class="workspace-grid">
+    <aside class="card panel">
+      <div class="field">
+        <label for="id-preset">{copy.presetLabel}</label>
+        <select id="id-preset" data-id-preset>
+          {copy.presets.map((p) => (
+            <option value={p.id}>{p.name} ({p.spec})</option>
+          ))}
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="range-row">
+          <label for="id-zoom">{copy.zoomLabel}</label>
+          <span class="range-value" data-id-zoom-val>100%</span>
+        </div>
+        <input id="id-zoom" type="range" min="50" max="300" value="100" data-id-zoom />
+      </div>
+
+      <div class="field">
+        <label for="id-bg">{copy.bgLabel}</label>
+        <input id="id-bg" type="color" value="#ffffff" data-id-bg />
+      </div>
+
+      <div class="field">
+        <label class="checkbox-card" style="background: var(--surface-subtle); border-color: var(--border);">
+          <input type="checkbox" checked data-id-guide />
+          <div><strong>{copy.guideLabel}</strong></div>
+        </label>
+      </div>
+
+      <div class="field">
+        <label for="id-format">{copy.formatLabel}</label>
+        <select id="id-format" data-id-format>
+          <option value="image/jpeg" selected>JPG (300 DPI)</option>
+          <option value="image/png">PNG (무손실)</option>
+        </select>
+      </div>
+
+      <div style="display: grid; gap: 10px; margin-top: 16px;">
+        <button type="button" class="btn btn-primary" data-id-download-single disabled>
+          {copy.downloadSingleBtn}
+        </button>
+        <button type="button" class="btn btn-secondary" data-id-download-sheet disabled>
+          {copy.downloadSheetBtn}
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-id-reset disabled>
+          {copy.resetBtn}
+        </button>
+      </div>
+      <div class="status-banner" data-id-status></div>
+    </aside>
+
+    <div>
+      <div class="dropzone" data-id-drop role="button" tabindex="0">
+        <input type="file" accept="image/*" hidden data-id-input />
+        <h2>{copy.dropTitle}</h2>
+        <p>{copy.dropHint}</p>
+        <span class="btn btn-primary btn-sm">{copy.selectFile}</span>
+        <div class="paste-hint">
+          <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+        </div>
+      </div>
+
+      <div class="card id-stage" data-id-stage hidden>
+        <div class="id-stage-bar">
+          <span class="id-spec-badge" data-id-spec>413 × 531 px (300 DPI)</span>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" data-id-change>{copy.changeBtn}</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-id-clear>{copy.clearBtn}</button>
+          </div>
+        </div>
+        <p class="id-drag-hint">{copy.dragHint}</p>
+        <div class="id-canvas-wrap">
+          <canvas class="id-canvas" data-id-canvas></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ToolSeoGuide locale={locale} toolKey="id-photo" />
+
+<script>
+  import { initIdPhoto } from '../scripts/id-photo';
+  const root = document.getElementById('id-photo-root');
+  if (root) initIdPhoto(root);
+</script>
+
+<style>
+  .id-stage {
+    padding: 18px;
+  }
+  .id-stage[hidden] {
+    display: none;
+  }
+  .id-stage-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .id-spec-badge {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .id-drag-hint {
+    margin: 0 0 14px;
+    font-size: 0.84rem;
+    color: var(--ink-muted);
+  }
+  .id-canvas-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+  }
+  .id-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 460px;
+    width: auto;
+    height: auto;
+    cursor: grab;
+    touch-action: none;
+    border-radius: 4px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--border);
+  }
+  .id-canvas:active {
+    cursor: grabbing;
+  }
+</style>

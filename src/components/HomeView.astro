@@ -35,30 +35,63 @@ const faqSchema = {
   <p>{home.heroSubtitle}</p>
 </section>
 
-<!-- iLoveIMG-inspired Category Filter + Icon-First Tool Hub -->
+<!-- iLoveIMG-inspired Category Filter + Instant Search + Recent Tools + Icon-First Tool Hub -->
 <section id="tools" class="tool-hub">
-  <div class="filter-bar" role="tablist" aria-label="Tool categories">
-    <button type="button" class="filter-pill active" role="tab" aria-selected="true" data-filter="all">
-      {t.categories.all}
-      <span class="filter-count">{t.tools.length}</span>
-    </button>
-    <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="image">
-      {t.categories.image}
-      <span class="filter-count">{t.tools.filter((x) => x.category === 'image').length}</span>
-    </button>
-    <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="pdf">
-      {t.categories.pdf}
-      <span class="filter-count">{t.tools.filter((x) => x.category === 'pdf').length}</span>
-    </button>
-    <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="utility">
-      {t.categories.utility}
-      <span class="filter-count">{t.tools.filter((x) => x.category === 'utility').length}</span>
-    </button>
+  <div class="hub-controls">
+    <div class="filter-bar" role="tablist" aria-label="Tool categories">
+      <button type="button" class="filter-pill active" role="tab" aria-selected="true" data-filter="all">
+        {t.categories.all}
+        <span class="filter-count">{t.tools.length}</span>
+      </button>
+      <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="image">
+        {t.categories.image}
+        <span class="filter-count">{t.tools.filter((x) => x.category === 'image').length}</span>
+      </button>
+      <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="pdf">
+        {t.categories.pdf}
+        <span class="filter-count">{t.tools.filter((x) => x.category === 'pdf').length}</span>
+      </button>
+      <button type="button" class="filter-pill" role="tab" aria-selected="false" data-filter="utility">
+        {t.categories.utility}
+        <span class="filter-count">{t.tools.filter((x) => x.category === 'utility').length}</span>
+      </button>
+    </div>
+
+    <div class="hub-search-wrap">
+      <svg class="hub-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input
+        type="search"
+        class="hub-search-input"
+        data-hub-search
+        placeholder={locale === 'ko' ? '도구 검색 (예: 모자이크, PDF 합치기, WebP...)' : 'Search tools (e.g., blur, merge PDF, WebP...)'}
+        aria-label={locale === 'ko' ? '도구 검색' : 'Search tools'}
+        autocomplete="off"
+      />
+      <button type="button" class="hub-search-clear" data-hub-search-clear hidden aria-label={locale === 'ko' ? '검색어 지우기' : 'Clear search'}>
+        ×
+      </button>
+    </div>
+  </div>
+
+  <div class="recent-tools-bar" data-recent-bar hidden>
+    <span class="recent-tools-label">{locale === 'ko' ? '최근 사용' : 'Recent'}</span>
+    <div class="recent-tools-list" data-recent-list></div>
   </div>
 
   <div class="hub-grid" data-hub-grid>
     {t.tools.map((tool) => (
-      <a href={tool.slug} class="card hub-card" data-category={tool.category}>
+      <a
+        href={tool.slug}
+        class="card hub-card"
+        data-category={tool.category}
+        data-tool-id={tool.id}
+        data-tool-short={tool.shortTitle}
+        data-tool-accent={tool.accent}
+        data-search={`${tool.title} ${tool.shortTitle} ${tool.shortDesc} ${tool.description} ${tool.badge} ${tool.features.join(' ')}`.toLowerCase()}
+      >
         <div class="hub-card-head">
           <span class={`tool-icon-lg accent-${tool.accent}`}>
             <ToolIcon id={tool.id} size={22} />
@@ -76,6 +109,13 @@ const faqSchema = {
         </span>
       </a>
     ))}
+  </div>
+
+  <div class="hub-empty card" data-hub-empty hidden>
+    <p>{locale === 'ko' ? '검색어와 일치하는 도구가 없습니다.' : 'No tools match your search.'}</p>
+    <button type="button" class="btn btn-secondary btn-sm" data-hub-reset>
+      {locale === 'ko' ? '전체 도구 보기' : 'Show all tools'}
+    </button>
   </div>
 </section>
 
@@ -126,22 +166,222 @@ const faqSchema = {
   (() => {
     const pills = Array.from(document.querySelectorAll('[data-filter]'));
     const cards = Array.from(document.querySelectorAll('[data-hub-grid] [data-category]'));
+    const searchInput = document.querySelector('[data-hub-search]');
+    const clearBtn = document.querySelector('[data-hub-search-clear]');
+    const emptyEl = document.querySelector('[data-hub-empty]');
+    const resetBtn = document.querySelector('[data-hub-reset]');
+    const recentBar = document.querySelector('[data-recent-bar]');
+    const recentList = document.querySelector('[data-recent-list]');
+
+    let currentFilter = 'all';
+    let currentQuery = '';
+
+    function renderGrid() {
+      const q = currentQuery.trim().toLowerCase();
+      let visibleCount = 0;
+      cards.forEach((card) => {
+        const cat = card.getAttribute('data-category');
+        const haystack = card.getAttribute('data-search') || '';
+        const catMatch = currentFilter === 'all' || cat === currentFilter;
+        const queryMatch = !q || haystack.includes(q);
+        const show = catMatch && queryMatch;
+        card.hidden = !show;
+        if (show) visibleCount += 1;
+      });
+      if (emptyEl) emptyEl.hidden = visibleCount > 0;
+      if (clearBtn) clearBtn.hidden = q.length === 0;
+    }
+
     function applyFilter(filter) {
-      const target = pills.some((p) => p.getAttribute('data-filter') === filter) ? filter : 'all';
+      currentFilter = pills.some((p) => p.getAttribute('data-filter') === filter) ? filter : 'all';
       pills.forEach((p) => {
-        const active = p.getAttribute('data-filter') === target;
+        const active = p.getAttribute('data-filter') === currentFilter;
         p.classList.toggle('active', active);
         p.setAttribute('aria-selected', String(active));
       });
-      cards.forEach((card) => {
-        const cat = card.getAttribute('data-category');
-        card.hidden = target !== 'all' && cat !== target;
-      });
+      renderGrid();
     }
+
     pills.forEach((pill) => {
       pill.addEventListener('click', () => applyFilter(pill.getAttribute('data-filter') || 'all'));
     });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        currentQuery = searchInput.value || '';
+        renderGrid();
+      });
+    }
+
+    if (clearBtn && searchInput) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        currentQuery = '';
+        renderGrid();
+        searchInput.focus();
+      });
+    }
+
+    if (resetBtn && searchInput) {
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        currentQuery = '';
+        applyFilter('all');
+      });
+    }
+
+    // Populate "Recent tools" bar from localStorage
+    if (recentBar && recentList) {
+      try {
+        const raw = localStorage.getItem('kitzero-recent-tools');
+        const ids = Array.isArray(JSON.parse(raw || '[]')) ? JSON.parse(raw || '[]') : [];
+        const matched = ids
+          .map((id) => cards.find((c) => c.getAttribute('data-tool-id') === id))
+          .filter(Boolean);
+        if (matched.length > 0) {
+          recentList.innerHTML = '';
+          matched.forEach((card) => {
+            const a = document.createElement('a');
+            a.className = 'recent-pill';
+            a.href = card.getAttribute('href') || '#';
+            a.textContent = card.getAttribute('data-tool-short') || '';
+            recentList.appendChild(a);
+          });
+          recentBar.hidden = false;
+        }
+      } catch {}
+    }
+
     const initialCat = new URLSearchParams(window.location.search).get('cat');
     if (initialCat) applyFilter(initialCat);
   })();
 </script>
+
+<style>
+  .hub-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .hub-controls .filter-bar {
+    margin-bottom: 0;
+  }
+  .hub-search-wrap {
+    position: relative;
+    flex: 1 1 260px;
+    max-width: 360px;
+  }
+  .hub-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .hub-search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 34px 0 36px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .hub-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+  .hub-search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  .hub-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hub-search-clear[hidden] {
+    display: none;
+  }
+  .recent-tools-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+  }
+  .recent-tools-bar[hidden] {
+    display: none;
+  }
+  .recent-tools-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .recent-tools-list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .recent-tools-bar :global(.recent-pill) {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .recent-tools-bar :global(.recent-pill:hover) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .hub-empty {
+    text-align: center;
+    padding: 36px 20px;
+    margin-top: 12px;
+  }
+  .hub-empty[hidden] {
+    display: none;
+  }
+  .hub-empty p {
+    margin: 0 0 14px;
+    color: var(--text-muted);
+  }
+  @media (max-width: 720px) {
+    .hub-search-wrap {
+      max-width: 100%;
+      flex-basis: 100%;
+    }
+  }
+</style>

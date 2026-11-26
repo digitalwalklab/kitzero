@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PdfToolsView from './PdfToolsView.astro';
+import { pdfDedicatedPages, type PdfDedicatedPageId } from '../i18n/pdfPages';
+import type { Locale } from '../i18n/translations';
+
+interface Props {
+  locale: Locale;
+  pageId: PdfDedicatedPageId;
+}
+
+const { locale, pageId } = Astro.props;
+const page = pdfDedicatedPages[locale][pageId];
+---
+
+<BaseLayout
+  locale={locale}
+  title={page.metaTitle}
+  description={page.metaDesc}
+  activeNav={page.id}
+>
+  <PdfToolsView
+    locale={locale}
+    initialTab={page.tab}
+    titleOverride={page.title}
+    subtitleOverride={page.subtitle}
+    guideKey={page.guideKey}
+    activeToolId={page.toolId}
+  />
+</BaseLayout>

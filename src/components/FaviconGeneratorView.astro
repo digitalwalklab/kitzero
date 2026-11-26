@@ -62,6 +62,9 @@ const copy = getExtraCopy(locale).faviconGenerator;
         <h2>{copy.dropTitle}</h2>
         <p>{copy.dropHint}</p>
         <span class="btn btn-primary btn-sm">{copy.selectFile}</span>
+        <div class="paste-hint">
+          <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+        </div>
       </div>
 
       <div class="card panel" style="margin-top: 16px;" data-fav-preview-wrap hidden>

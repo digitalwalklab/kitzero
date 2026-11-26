@@ -1,15 +1,31 @@
 ---
 import ToolIcon from './ToolIcon.astro';
+import CategorySubNav from './CategorySubNav.astro';
 import ToolSeoGuide from './ToolSeoGuide.astro';
-import { translations, type Locale } from '../i18n/translations';
+import { translations, type Locale, type ToolSummary } from '../i18n/translations';
 import { getExtraCopy } from '../i18n/extraTools';
 import { getExtra2Copy } from '../i18n/extraTools2';
+import type { PdfTabKey } from '../i18n/pdfPages';
+import type { GuideKey } from '../i18n/toolGuides';
 
 interface Props {
   locale: Locale;
+  initialTab?: PdfTabKey;
+  titleOverride?: string;
+  subtitleOverride?: string;
+  guideKey?: GuideKey;
+  activeToolId?: ToolSummary['id'];
 }
 
-const { locale } = Astro.props;
+const {
+  locale,
+  initialTab = 'merge',
+  titleOverride,
+  subtitleOverride,
+  guideKey = 'pdf-tools',
+  activeToolId,
+} = Astro.props;
+const isDedicatedPage = Boolean(activeToolId);
 const t = translations[locale];
 const copy = t.pdfTools;
 const extra = getExtraCopy(locale).pdfExtra;
@@ -66,47 +82,53 @@ const clientLabels = {
 
 <section class="page-header">
   <div class="page-header-top">
-    <h1>{copy.title}</h1>
+    <h1>{titleOverride ?? copy.title}</h1>
     <span class="trust-pill">
       <span class="trust-dot" aria-hidden="true"></span>
       {t.localBadge}
     </span>
   </div>
-  <p>{copy.subtitle}</p>
+  <p>{subtitleOverride ?? copy.subtitle}</p>
 </section>
+
+{isDedicatedPage && activeToolId && (
+  <CategorySubNav locale={locale} category="pdf" activeId={activeToolId} />
+)}
 
 <div
   id="pdf-tools-root"
+  data-initial-tab={initialTab}
   data-labels={JSON.stringify(clientLabels)}
   data-extra-labels={JSON.stringify(extraLabels)}
   data-more-labels={JSON.stringify(moreLabels)}
 >
+  {!isDedicatedPage && (
   <div class="tabs" role="tablist">
-    <button type="button" class="tab-btn active" role="tab" data-tab-btn="merge">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'merge' }]} role="tab" data-tab-btn="merge">
       <span class="tool-subtab-icon accent-rose"><ToolIcon id="pdf-merge" size={15} /></span>
       <span>{copy.tabMerge}</span>
     </button>
-    <button type="button" class="tab-btn" role="tab" data-tab-btn="split">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'split' }]} role="tab" data-tab-btn="split">
       <span class="tool-subtab-icon accent-amber"><ToolIcon id="pdf-split" size={15} /></span>
       <span>{copy.tabSplit}</span>
     </button>
-    <button type="button" class="tab-btn" role="tab" data-tab-btn="to-image">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'to-image' }]} role="tab" data-tab-btn="to-image">
       <span class="tool-subtab-icon accent-violet"><ToolIcon id="pdf-to-image" size={15} /></span>
       <span>{copy.tabToImage}</span>
     </button>
-    <button type="button" class="tab-btn" role="tab" data-tab-btn="from-image">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'from-image' }]} role="tab" data-tab-btn="from-image">
       <span class="tool-subtab-icon accent-emerald"><ToolIcon id="image-to-pdf" size={15} /></span>
       <span>{extra.tabFromImage}</span>
     </button>
-    <button type="button" class="tab-btn" role="tab" data-tab-btn="organize">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'organize' }]} role="tab" data-tab-btn="organize">
       <span class="tool-subtab-icon accent-blue"><ToolIcon id="pdf-organize" size={15} /></span>
       <span>{extra.tabOrganize}</span>
     </button>
-    <button type="button" class="tab-btn" role="tab" data-tab-btn="compress">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'compress' }]} role="tab" data-tab-btn="compress">
       <span class="tool-subtab-icon accent-emerald"><ToolIcon id="pdf-compress" size={15} /></span>
       <span>{more.tabCompress}</span>
     </button>
-    <button type="button" class="tab-btn" role="tab" data-tab-btn="watermark">
+    <button type="button" class:list={['tab-btn', { active: initialTab === 'watermark' }]} role="tab" data-tab-btn="watermark">
       <span class="tool-subtab-icon accent-amber"><ToolIcon id="pdf-watermark" size={15} /></span>
       <span>{more.tabWatermark}</span>
     </button>
@@ -115,9 +137,10 @@ const clientLabels = {
       <span>{locale === 'ko' ? 'PDF 서명 · 도장' : 'Sign PDF'}</span>
     </a>
   </div>
+  )}
 
   <!-- TAB 1: MERGE -->
-  <section class="tab-panel active" data-tab-panel="merge">
+  <section class:list={['tab-panel', { active: initialTab === 'merge' }]} data-tab-panel="merge">
     <div class="dropzone" data-merge-drop role="button" tabindex="0">
       <input type="file" accept="application/pdf" multiple hidden data-merge-input />
       <div class="dropzone-icon" aria-hidden="true">
@@ -143,7 +166,7 @@ const clientLabels = {
   </section>
 
   <!-- TAB 2: SPLIT -->
-  <section class="tab-panel" data-tab-panel="split">
+  <section class:list={['tab-panel', { active: initialTab === 'split' }]} data-tab-panel="split">
     <div class="workspace-grid">
       <aside class="card panel">
         <div class="field">
@@ -193,7 +216,7 @@ const clientLabels = {
   </section>
 
   <!-- TAB 3: PDF TO IMAGE -->
-  <section class="tab-panel" data-tab-panel="to-image">
+  <section class:list={['tab-panel', { active: initialTab === 'to-image' }]} data-tab-panel="to-image">
     <div class="workspace-grid">
       <aside class="card panel">
         <div class="field">
@@ -263,7 +286,7 @@ const clientLabels = {
   </section>
 
   <!-- TAB 4: IMAGES TO PDF -->
-  <section class="tab-panel" data-tab-panel="from-image">
+  <section class:list={['tab-panel', { active: initialTab === 'from-image' }]} data-tab-panel="from-image">
     <div class="workspace-grid">
       <aside class="card panel">
         <div class="field">
@@ -298,6 +321,9 @@ const clientLabels = {
           <h2>{extra.fromImage.dropTitle}</h2>
           <p>{extra.fromImage.dropHint}</p>
           <span class="btn btn-primary btn-sm">{extra.fromImage.selectFiles}</span>
+          <div class="paste-hint">
+            <kbd>Ctrl+V</kbd> / <kbd>⌘+V</kbd> {locale === 'ko' ? '클립보드 이미지 붙여넣기 지원' : 'clipboard image paste supported'}
+          </div>
         </div>
         <div class="file-list" data-fromimg-list></div>
       </div>
@@ -305,7 +331,7 @@ const clientLabels = {
   </section>
 
   <!-- TAB 5: ORGANIZE PDF (ROTATE / DELETE / REORDER) -->
-  <section class="tab-panel" data-tab-panel="organize">
+  <section class:list={['tab-panel', { active: initialTab === 'organize' }]} data-tab-panel="organize">
     <div class="dropzone" data-org-drop role="button" tabindex="0">
       <input type="file" accept="application/pdf" hidden data-org-input />
       <h2>{extra.organize.dropTitle}</h2>
@@ -322,7 +348,7 @@ const clientLabels = {
   </section>
 
   <!-- TAB 6: PDF COMPRESS -->
-  <section class="tab-panel" data-tab-panel="compress">
+  <section class:list={['tab-panel', { active: initialTab === 'compress' }]} data-tab-panel="compress">
     <div class="workspace-grid">
       <aside class="card panel">
         <div class="field">
@@ -365,7 +391,7 @@ const clientLabels = {
   </section>
 
   <!-- TAB 7: PDF WATERMARK & PAGE NUMBERS -->
-  <section class="tab-panel" data-tab-panel="watermark">
+  <section class:list={['tab-panel', { active: initialTab === 'watermark' }]} data-tab-panel="watermark">
     <div class="workspace-grid">
       <aside class="card panel">
         <div class="field">
@@ -412,7 +438,7 @@ const clientLabels = {
   </section>
 </div>
 
-<ToolSeoGuide locale={locale} toolKey="pdf-tools" />
+<ToolSeoGuide locale={locale} toolKey={guideKey} />
 
 <script>
   import { initPdfTools } from '../scripts/pdf-tools';

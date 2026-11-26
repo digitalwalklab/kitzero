@@ -91,8 +91,11 @@ export function initPdfTools(root: HTMLElement): void {
       }
     });
   });
-  const initialTab = new URLSearchParams(window.location.search).get('tab');
-  activateTab(initialTab || 'merge');
+  const urlTab = new URLSearchParams(window.location.search).get('tab');
+  const defaultTab = root.dataset.initialTab || 'merge';
+  if (tabBtns.length > 0) {
+    activateTab(urlTab || defaultTab);
+  }
 
   function setStatus(el: HTMLElement, type: 'success' | 'error' | 'info' | 'warn' | '', message: string): void {
     el.className = 'status-banner';

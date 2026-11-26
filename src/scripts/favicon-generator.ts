@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import {
+  bindClipboardImagePaste,
   bindDropzoneKeyboard,
   generateAndDownloadZip,
   loadImageFromFile,
@@ -86,6 +87,9 @@ export function initFaviconGenerator(root: HTMLElement): void {
     fileInput.click();
   });
   bindDropzoneKeyboard(dropzone, fileInput);
+  bindClipboardImagePaste((files) => {
+    if (files[0]) void loadFile(files[0]);
+  });
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('drag-over');

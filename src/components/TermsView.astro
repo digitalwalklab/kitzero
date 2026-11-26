@@ -1,0 +1,41 @@
+---
+import { translations, type Locale } from '../i18n/translations';
+import { legalPages } from '../i18n/legalPages';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = legalPages[locale].terms;
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+  <p class="legal-meta">{copy.updatedLabel}</p>
+</section>
+
+<div class="faq-list">
+  {copy.sections.map((section) => (
+    <article class="card faq-item">
+      <h3>{section.heading}</h3>
+      <p>{section.body}</p>
+    </article>
+  ))}
+</div>
+
+<style>
+  .legal-meta {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+  }
+</style>

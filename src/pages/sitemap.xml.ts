@@ -10,11 +10,24 @@ const ROUTE_PATHS = [
   '/image-blur/',
   '/heic-converter/',
   '/watermark/',
+  '/image-merge/',
+  '/id-photo/',
   '/pdf-tools/',
+  '/pdf-merge/',
+  '/pdf-split/',
+  '/pdf-to-image/',
+  '/image-to-pdf/',
+  '/pdf-organize/',
+  '/pdf-compress/',
+  '/pdf-watermark/',
   '/pdf-sign/',
   '/qr-generator/',
   '/favicon-generator/',
   '/svg-converter/',
+  '/word-counter/',
+  '/color-picker/',
+  '/about/',
+  '/terms/',
   '/privacy/',
 ];
 
@@ -24,7 +37,12 @@ export const GET: APIRoute = () => {
   const entries = ROUTE_PATHS.flatMap((path) => {
     const koUrl = `${SITE}${path}`;
     const enUrl = `${SITE}${path === '/' ? '/en/' : `/en${path}`}`;
-    const priority = path === '/' ? '1.0' : path === '/privacy/' ? '0.4' : '0.8';
+    const priority =
+      path === '/'
+        ? '1.0'
+        : path === '/privacy/' || path === '/terms/' || path === '/about/'
+          ? '0.4'
+          : '0.8';
 
     const links = `    <xhtml:link rel="alternate" hreflang="ko" href="${koUrl}" />
     <xhtml:link rel="alternate" hreflang="en" href="${enUrl}" />

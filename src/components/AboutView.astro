@@ -1,0 +1,77 @@
+---
+import { translations, type Locale } from '../i18n/translations';
+import { legalPages } from '../i18n/legalPages';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const copy = legalPages[locale].about;
+---
+
+<section class="page-header">
+  <div class="page-header-top">
+    <h1>{copy.title}</h1>
+    <span class="trust-pill">
+      <span class="trust-dot" aria-hidden="true"></span>
+      {t.localBadge}
+    </span>
+  </div>
+  <p>{copy.subtitle}</p>
+  <p class="legal-meta">{copy.updatedLabel}</p>
+</section>
+
+<section class="trust-grid" style="margin-bottom: 24px;" aria-label="KitZero highlights">
+  {copy.highlights.map((item) => (
+    <div class="card trust-card">
+      <h3>{item.title}</h3>
+      <p>{item.desc}</p>
+    </div>
+  ))}
+</section>
+
+<div class="faq-list" style="margin-bottom: 24px;">
+  {copy.sections.map((section) => (
+    <article class="card faq-item">
+      <h3>{section.heading}</h3>
+      <p>{section.body}</p>
+    </article>
+  ))}
+</div>
+
+<section class="card about-contact">
+  <h2>{copy.contactHeading}</h2>
+  <p>{copy.contactDesc}</p>
+  <a
+    href={copy.contactUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-primary"
+  >
+    {copy.contactCta}
+  </a>
+</section>
+
+<style>
+  .legal-meta {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+  }
+  .about-contact {
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .about-contact h2 {
+    font-size: 1.2rem;
+    margin: 0 0 10px;
+  }
+  .about-contact p {
+    margin: 0 auto 18px;
+    max-width: 560px;
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+</style>

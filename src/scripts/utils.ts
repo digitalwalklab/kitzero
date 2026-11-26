@@ -293,3 +293,37 @@ export function parsePageRanges(input: string, maxPages: number): number[] {
 
   return Array.from(result).sort((a, b) => a - b);
 }
+
+export function bindClipboardImagePaste(
+  onFiles: (files: File[]) => void,
+  isActive?: () => boolean
+): void {
+  window.addEventListener('paste', (e: ClipboardEvent) => {
+    if (isActive && !isActive()) return;
+    const items = Array.from(e.clipboardData?.items ?? []);
+    const imageItems = items.filter((item) => item.kind === 'file' && item.type.startsWith('image/'));
+    if (imageItems.length === 0) return;
+
+    const files: File[] = [];
+    const stamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+    let idx = 0;
+
+    for (const item of imageItems) {
+      const raw = item.getAsFile();
+      if (!raw) continue;
+      idx += 1;
+      const mime = raw.type || 'image/png';
+      const ext = extensionFromMime(mime);
+      const name =
+        raw.name && raw.name !== 'image.png'
+          ? raw.name
+          : `clipboard-${stamp}${idx > 1 ? `-${idx}` : ''}.${ext}`;
+      files.push(new File([raw], name, { type: mime, lastModified: Date.now() }));
+    }
+
+    if (files.length > 0) {
+      e.preventDefault();
+      onFiles(files);
+    }
+  });
+}
