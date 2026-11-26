@@ -73,6 +73,7 @@ const faqSchema = {
       <button type="button" class="hub-search-clear" data-hub-search-clear hidden aria-label={locale === 'ko' ? '검색어 지우기' : 'Clear search'}>
         ×
       </button>
+      <kbd class="hub-search-kbd" data-hub-search-kbd aria-hidden="true">/</kbd>
     </div>
   </div>
 
@@ -168,6 +169,7 @@ const faqSchema = {
     const cards = Array.from(document.querySelectorAll('[data-hub-grid] [data-category]'));
     const searchInput = document.querySelector('[data-hub-search]');
     const clearBtn = document.querySelector('[data-hub-search-clear]');
+    const kbdHint = document.querySelector('[data-hub-search-kbd]');
     const emptyEl = document.querySelector('[data-hub-empty]');
     const resetBtn = document.querySelector('[data-hub-reset]');
     const recentBar = document.querySelector('[data-recent-bar]');
@@ -190,6 +192,7 @@ const faqSchema = {
       });
       if (emptyEl) emptyEl.hidden = visibleCount > 0;
       if (clearBtn) clearBtn.hidden = q.length === 0;
+      if (kbdHint) kbdHint.hidden = q.length > 0;
     }
 
     function applyFilter(filter) {
@@ -210,6 +213,22 @@ const faqSchema = {
       searchInput.addEventListener('input', () => {
         currentQuery = searchInput.value || '';
         renderGrid();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+          const tag = document.activeElement?.tagName;
+          if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+          e.preventDefault();
+          searchInput.focus();
+        } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+          if (searchInput.value) {
+            searchInput.value = '';
+            currentQuery = '';
+            renderGrid();
+          } else {
+            searchInput.blur();
+          }
+        }
       });
     }
 
@@ -319,8 +338,29 @@ const faqSchema = {
     align-items: center;
     justify-content: center;
   }
-  .hub-search-clear[hidden] {
+  .hub-search-clear[hidden],
+  .hub-search-kbd[hidden] {
     display: none;
+  }
+  .hub-search-kbd {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 1px 7px;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    pointer-events: none;
+  }
+  @media (max-width: 720px) {
+    .hub-search-kbd {
+      display: none;
+    }
   }
   .recent-tools-bar {
     display: flex;

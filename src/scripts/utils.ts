@@ -330,12 +330,35 @@ export function bindClipboardImagePaste(
 
 export type StatusBannerType = 'success' | 'error' | 'info' | 'warn' | '';
 
+let toastTimer: number | undefined;
+
+export function showToast(message: string, type: 'success' | 'info' | 'warn' = 'success'): void {
+  if (typeof document === 'undefined' || !message) return;
+  let el = document.getElementById('kitzero-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'kitzero-toast';
+    el.className = 'kitzero-toast';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    document.body.appendChild(el);
+  }
+  el.textContent = message;
+  el.className = `kitzero-toast show${type === 'warn' ? ' warn' : ''}`;
+  if (toastTimer) window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
+    el?.classList.remove('show');
+  }, 2400);
+}
+
 export function setStatusBanner(
   el: HTMLElement | null | undefined,
   type: StatusBannerType,
   message: string
 ): void {
   if (!el) return;
+  if (!el.hasAttribute('role')) el.setAttribute('role', 'status');
+  if (!el.hasAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
   el.className = 'status-banner';
   if (!message) {
     el.textContent = '';
@@ -343,6 +366,9 @@ export function setStatusBanner(
   }
   el.classList.add('show', type || 'info');
   el.textContent = message;
+  if (type === 'success' || type === 'warn') {
+    showToast(message, type);
+  }
 }
 
 export interface BindDropzoneOptions {

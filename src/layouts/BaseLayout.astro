@@ -241,6 +241,9 @@ const jsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body data-active-tool={activeNav !== 'home' && activeNav !== 'privacy' && activeNav !== 'terms' && activeNav !== 'about' && activeNav !== 'pdf-tools' ? activeNav : undefined}>
+    <a href="#main-content" class="skip-link">
+      {locale === 'ko' ? '본문으로 바로가기' : 'Skip to main content'}
+    </a>
     <header class="site-header">
       <div class="container header-inner">
         <a href={prefix ? `${prefix}/` : '/'} class="brand">
@@ -431,7 +434,7 @@ const jsonLd = {
       </div>
     </div>
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <div class="container">
         {activeNav !== 'home' && (
           <nav class="breadcrumb" aria-label="Breadcrumb">
