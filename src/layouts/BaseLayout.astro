@@ -358,55 +358,55 @@ const jsonLd = {
           </button>
         </div>
       </div>
+    </header>
 
-      <!-- Mobile Drawer -->
-      <div class="mobile-drawer" id="mobile-drawer" hidden>
-        <div class="container mobile-drawer-inner">
-          <div class="mobile-group-label">{t.nav.imageMenu}</div>
-          <div class="mobile-group-list">
-            {imageTools.map((tool) => (
-              <a href={tool.slug} class="dropdown-item">
-                <span class={`tool-icon-sm accent-${tool.accent}`}>
-                  <ToolIcon id={tool.id} size={17} />
-                </span>
-                <span>
-                  <strong>{tool.shortTitle}</strong>
-                  <small>{tool.shortDesc}</small>
-                </span>
-              </a>
-            ))}
-          </div>
-          <div class="mobile-group-label">{t.nav.pdfMenu}</div>
-          <div class="mobile-group-list">
-            {pdfTools.map((tool) => (
-              <a href={tool.slug} class="dropdown-item">
-                <span class={`tool-icon-sm accent-${tool.accent}`}>
-                  <ToolIcon id={tool.id} size={17} />
-                </span>
-                <span>
-                  <strong>{tool.shortTitle}</strong>
-                  <small>{tool.shortDesc}</small>
-                </span>
-              </a>
-            ))}
-          </div>
-          <div class="mobile-group-label">{t.nav.utilityMenu}</div>
-          <div class="mobile-group-list">
-            {utilityTools.map((tool) => (
-              <a href={tool.slug} class="dropdown-item">
-                <span class={`tool-icon-sm accent-${tool.accent}`}>
-                  <ToolIcon id={tool.id} size={17} />
-                </span>
-                <span>
-                  <strong>{tool.shortTitle}</strong>
-                  <small>{tool.shortDesc}</small>
-                </span>
-              </a>
-            ))}
-          </div>
+    <!-- Mobile Drawer (outside header so backdrop-filter never traps position: fixed) -->
+    <div class="mobile-drawer" id="mobile-drawer" hidden>
+      <div class="container mobile-drawer-inner">
+        <div class="mobile-group-label">{t.nav.imageMenu}</div>
+        <div class="mobile-group-list">
+          {imageTools.map((tool) => (
+            <a href={tool.slug} class="dropdown-item">
+              <span class={`tool-icon-sm accent-${tool.accent}`}>
+                <ToolIcon id={tool.id} size={17} />
+              </span>
+              <span>
+                <strong>{tool.shortTitle}</strong>
+                <small>{tool.shortDesc}</small>
+              </span>
+            </a>
+          ))}
+        </div>
+        <div class="mobile-group-label">{t.nav.pdfMenu}</div>
+        <div class="mobile-group-list">
+          {pdfTools.map((tool) => (
+            <a href={tool.slug} class="dropdown-item">
+              <span class={`tool-icon-sm accent-${tool.accent}`}>
+                <ToolIcon id={tool.id} size={17} />
+              </span>
+              <span>
+                <strong>{tool.shortTitle}</strong>
+                <small>{tool.shortDesc}</small>
+              </span>
+            </a>
+          ))}
+        </div>
+        <div class="mobile-group-label">{t.nav.utilityMenu}</div>
+        <div class="mobile-group-list">
+          {utilityTools.map((tool) => (
+            <a href={tool.slug} class="dropdown-item">
+              <span class={`tool-icon-sm accent-${tool.accent}`}>
+                <ToolIcon id={tool.id} size={17} />
+              </span>
+              <span>
+                <strong>{tool.shortTitle}</strong>
+                <small>{tool.shortDesc}</small>
+              </span>
+            </a>
+          ))}
         </div>
       </div>
-    </header>
+    </div>
 
     <main>
       <div class="container">
@@ -509,6 +509,7 @@ const jsonLd = {
           if (!mobileBtn || !mobileDrawer) return;
           mobileDrawer.hidden = !open;
           mobileBtn.setAttribute('aria-expanded', String(open));
+          document.documentElement.classList.toggle('drawer-open', open);
           document.body.classList.toggle('drawer-open', open);
           if (open) mobileDrawer.scrollTop = 0;
         }

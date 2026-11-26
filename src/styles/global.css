@@ -145,7 +145,7 @@ select {
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 60;
   background: var(--header-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -338,7 +338,7 @@ select {
 
 .mobile-drawer {
   position: fixed;
-  top: 65px;
+  top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -349,9 +349,10 @@ select {
   -webkit-overflow-scrolling: touch;
   border-top: 1px solid var(--border);
   background: var(--surface);
-  padding: 16px 0 40px;
+  padding: 16px 0 48px;
 }
 
+html.drawer-open,
 body.drawer-open {
   overflow: hidden;
 }
