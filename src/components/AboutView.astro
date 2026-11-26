@@ -26,7 +26,7 @@ const copy = legalPages[locale].about;
 <section class="trust-grid" style="margin-bottom: 24px;" aria-label="KitZero highlights">
   {copy.highlights.map((item) => (
     <div class="card trust-card">
-      <h3>{item.title}</h3>
+      <h2>{item.title}</h2>
       <p>{item.desc}</p>
     </div>
   ))}
@@ -35,7 +35,7 @@ const copy = legalPages[locale].about;
 <div class="faq-list" style="margin-bottom: 24px;">
   {copy.sections.map((section) => (
     <article class="card faq-item">
-      <h3>{section.heading}</h3>
+      <h2>{section.heading}</h2>
       <p>{section.body}</p>
     </article>
   ))}

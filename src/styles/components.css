@@ -14,9 +14,6 @@
   .workspace-grid > .panel {
     position: sticky;
     top: 80px;
-    max-height: calc(100vh - 96px);
-    overflow-y: auto;
-    scrollbar-width: thin;
   }
 }
 
@@ -700,6 +697,7 @@
   padding: 20px 24px;
 }
 
+.faq-item h2,
 .faq-item h3 {
   margin: 0 0 8px;
   font-size: 1rem;
