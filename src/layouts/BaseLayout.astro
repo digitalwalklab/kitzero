@@ -130,11 +130,22 @@ const jsonLd = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="referrer" content="no-referrer" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data:; worker-src 'self' blob:; connect-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self';"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.google-analytics.com https://*.googletagmanager.com; worker-src 'self' blob:; connect-src 'self' blob: data: https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self';"
     />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W4VQ434K0S"></script>
+    <script is:inline>
+      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', 'G-W4VQ434K0S');
+      }
+    </script>
     <meta name="robots" content={isNotFound ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
     <meta name="google-site-verification" content="ck7xOhJMnQ__OUVVjJ-MZ_nw_WjEqoUK80U7QlBogww" />
     <meta name="naver-site-verification" content="e4f1cc9a0685bc16cad0b99a81496dcd25639bf4" />
